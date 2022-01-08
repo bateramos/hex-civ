@@ -1,3 +1,5 @@
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use sfml::{graphics::*, system::*, window::*};
 use rand;
 
@@ -97,6 +99,20 @@ fn main() {
 
     let scale = 3.;
     let grid_size = (30, 20);
+    let seed = rand::random::<u64>() % 10000;
+
+    fn generate_random<H>(args: Vec<H>, seed: u64) -> u32 where H: Hash {
+        let mut hasher = DefaultHasher::new();
+        let hash = args.iter().fold(1, |acc, item| {
+            item.hash(&mut hasher);
+            let hash = hasher.finish();
+            acc + (hash % 10000)
+        });
+
+        (hash * seed) as u32 % 100
+    }
+
+    println!("Seed: {}", seed);
 
     for y_i in 0..grid_size.0 {
         let mut line = HexagonLine::new();
@@ -115,7 +131,7 @@ fn main() {
 
             let mut sprite = green_field.clone();
             if y_i == 1 || y_i == 0 {
-                sprite = match (rand::random::<f64>() * 100.) as u32 {
+                sprite = match generate_random(vec![y_i, x_i], seed) {
                     00 ..= 10 => mountain.clone(),
                     19 ..= 40 => snow_with_tress.clone(),
                     _ => snow.clone(),
@@ -123,7 +139,7 @@ fn main() {
 
                 sprite.set_scale(Vector2f {x: 2.8, y: 2.8 });
             } else {
-                sprite = match (rand::random::<f64>() * 100.) as u32 {
+                sprite = match generate_random(vec![y_i, x_i], seed) {
                     0 ..= 8 => dense_forest.clone(),
                     21 ..= 25 => hill.clone(),
                     26 ..= 27 => mountain.clone(),
