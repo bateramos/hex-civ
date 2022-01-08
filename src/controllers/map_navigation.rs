@@ -1,8 +1,6 @@
 use sfml::{graphics::*, system::*, window::*};
 
-pub fn init_map_navigation(view: &View) -> Box<dyn Fn(&mut View, &Vec<Event>)> {
-    let center = view.center();
-
+pub fn init_map_navigation(center: Vector2f) -> Box<dyn Fn(&mut View, &Vec<Event>)> {
     Box::new(move |view, events| {
         events.iter().for_each(|event| {
             match event {

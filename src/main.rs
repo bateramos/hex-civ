@@ -12,7 +12,6 @@ use controllers::{
     init_city_selection,
     init_city_interface,
     init_city_sprites,
-    CityInterface,
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -63,17 +62,34 @@ impl CustomShapePoints for Hexagon {
     }
 }
 
+type Resolution = (u32, u32, f32);
+
+fn resolutions() -> Vec<Resolution> {
+    vec![
+        (2048, 1536, 5.),
+        (800, 600, 3.),
+    ]
+}
+
+
 fn main() {
+    let resolution = resolutions()[0];
+    let scale = resolution.2;
+    let grid_size = (30, 20);
+    let seed = rand::random::<u64>() % 10000;
+    let y_sprite_offset = 14. * scale;
+    println!("Seed: {};", seed);
+
     let mut window = RenderWindow::new(
-        (800, 600),
-        "Test",
+        (resolution.0, resolution.1),
+        "Hex Civ",
         Style::CLOSE,
         &Default::default(),
     );
 
     window.set_vertical_sync_enabled(true);
     window.set_position(Vector2i { x: 200, y: 200 });
-    let mut new_view = View::from_rect(&FloatRect::new(0., 0., 800., 600.));
+    let mut new_view = View::from_rect(&FloatRect::new(0., 0., resolution.0 as f32, resolution.1 as f32));
     window.set_view(&new_view);
 
     let font = Font::from_file("res/fonts/Seagram tfb.ttf").unwrap();
@@ -87,18 +103,16 @@ fn main() {
     let hill = Sprite::with_texture_and_rect(&texture, &IntRect::new(3 * sprite_x_padding, 0, 32, 50));
     let hill_with_trees = Sprite::with_texture_and_rect(&texture, &IntRect::new(4 * sprite_x_padding, 0, 32, 50));
     let mountain = Sprite::with_texture_and_rect(&texture, &IntRect::new(5 * sprite_x_padding, 0, 32, 50));
-    let city = Sprite::with_texture_and_rect(&texture, &IntRect::new(0 * sprite_x_padding, 1 * sprite_y_padding, 32, 50));
+    let mut city = Sprite::with_texture_and_rect(&texture, &IntRect::new(0 * sprite_x_padding, 1 * sprite_y_padding, 32, 50));
     let snow = Sprite::with_texture_and_rect(&texture, &IntRect::new(0 * sprite_x_padding, 2 * sprite_y_padding, 32, 50));
     let snow_with_tress = Sprite::with_texture_and_rect(&texture, &IntRect::new(1 * sprite_x_padding, 2 * sprite_y_padding, 32, 50));
+
+    city.set_scale(Vector2f {x: 0.9 * scale, y: 0.9 * scale });
 
     let mut sprites = Vec::new();
     let mut background_grid = Vec::new();
     let mut hexagons = HexagonColumn::new();
     let mut texts = Vec::new();
-
-    let scale = 3.;
-    let grid_size = (30, 20);
-    let seed = rand::random::<u64>() % 10000;
 
     fn generate_random<H>(args: Vec<H>, seed: u64) -> u32 where H: Hash {
         let mut hasher = DefaultHasher::new();
@@ -110,8 +124,6 @@ fn main() {
 
         (hash * seed) as u32 % 100
     }
-
-    println!("Seed: {}", seed);
 
     for y_i in 0..grid_size.0 {
         let mut line = HexagonLine::new();
@@ -136,7 +148,7 @@ fn main() {
                     _ => snow.clone(),
                 };
 
-                sprite.set_scale(Vector2f {x: 2.8, y: 2.8 });
+                sprite.set_scale(Vector2f {x: 0.9 * scale, y: 0.9 * scale });
             } else {
                 sprite = match generate_random(vec![y_i, x_i], seed) {
                     0 ..= 8 => dense_forest.clone(),
@@ -147,10 +159,10 @@ fn main() {
                     _ => green_field.clone(),
                 };
 
-                sprite.set_scale(Vector2f {x: 2.8, y: 2.4 });
+                sprite.set_scale(Vector2f {x: 0.9 * scale, y: 0.8 * scale });
             }
 
-            sprite.set_position(Vector2f {x, y: y - 42.});
+            sprite.set_position(Vector2f {x, y: y - y_sprite_offset});
 
             let center = Vector2f { x: x + 15. * scale, y: y + 10. * scale };
             let hexagon = Hexagon {
@@ -176,11 +188,11 @@ fn main() {
 
     hexagons = init_city_placement(hexagons);
 
-    let map_navigation_ticker = init_map_navigation(&new_view);
+    let map_navigation_ticker = init_map_navigation(new_view.center());
     let key_handler_ticker = init_key_handler();
-    let city_selection_ticker = init_city_selection();
+    let city_selection_ticker = init_city_selection(scale);
     let city_interface_ticker = init_city_interface();
-    let city_sprites_ticker = init_city_sprites();
+    let city_sprites_ticker = init_city_sprites(y_sprite_offset + (scale * 5.));
 
     let mut selected_city = None;
     let mut city_interface = None;

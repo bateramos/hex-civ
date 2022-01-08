@@ -1,9 +1,7 @@
-use sfml::{graphics::*, system::*, window::*};
-
-use crate::{Hexagon, HexagonCategory, HexagonColumn};
+use crate::{HexagonCategory, HexagonColumn};
 
 pub fn init_city_placement(mut hexagons: HexagonColumn) -> HexagonColumn {
-    let mut hexagon = hexagons[6].get_mut(7).unwrap();
+    let mut hexagon = hexagons[3].get_mut(3).unwrap();
     hexagon.category = HexagonCategory::CITY;
 
     hexagons

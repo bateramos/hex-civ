@@ -1,4 +1,4 @@
-use sfml::{graphics::*, system::*, window::*};
+use sfml::window::*;
 
 pub fn init_key_handler() -> Box<dyn Fn(&Vec<Event>)> {
     Box::new(|events| {

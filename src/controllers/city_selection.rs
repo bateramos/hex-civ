@@ -1,23 +1,23 @@
-use sfml::{graphics::*, system::*, window::*};
+use sfml::{graphics::*, window::*};
 
 use crate::{HexagonColumn, HexagonCategory, Hexagon};
 
-pub fn init_city_selection() -> Box<dyn Fn(&View, &Vec<Event>, &HexagonColumn, Option<Hexagon>) -> Option<Hexagon>> {
+pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &HexagonColumn, Option<Hexagon>) -> Option<Hexagon>> {
     Box::new(move |view, events, hexagons, selected_city| {
         let mut closest : Option<Hexagon> = selected_city;
         let center = view.center();
 
         events.iter().for_each(|event| {
             match event {
-                Event::MouseButtonPressed { x, y, button } => {
+                Event::MouseButtonPressed { button, .. } => {
                     if mouse::Button::RIGHT == *button {
                         closest = None
                     } else if mouse::Button::LEFT == *button {
                         if let Some(_) = selected_city {
                             return
                         }
-                        let mut x_index = (center.x / (40. * 3.)) as usize;
-                        let mut y_index = (center.y / (10. * 3.)) as usize;
+                        let mut x_index = (center.x / (40. * scale)) as usize;
+                        let mut y_index = (center.y / (10. * scale)) as usize;
 
                         if x_index <= 0 {
                             x_index = 1;
