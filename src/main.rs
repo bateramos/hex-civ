@@ -12,6 +12,7 @@ use controllers::{
     init_city_selection,
     init_city_interface,
     init_city_sprites,
+    CityInterface,
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -94,8 +95,6 @@ fn main() {
     let mut background_grid = Vec::new();
     let mut hexagons = HexagonColumn::new();
     let mut texts = Vec::new();
-    let mut city_ui = Vec::new();
-    let mut city_ui_text = Vec::new();
 
     let scale = 3.;
     let grid_size = (30, 20);
@@ -184,6 +183,7 @@ fn main() {
     let city_sprites_ticker = init_city_sprites();
 
     let mut selected_city = None;
+    let mut city_interface = None;
 
     loop {
         let mut events = Vec::new();
@@ -194,21 +194,19 @@ fn main() {
         map_navigation_ticker(&mut *new_view, &events);
         key_handler_ticker(&events);
         selected_city = city_selection_ticker(&new_view, &events, &hexagons, selected_city);
-        let (new_city_ui, new_city_ui_text) = city_interface_ticker(selected_city, city_ui, city_ui_text, &font);
+        city_interface = city_interface_ticker(selected_city, city_interface, &font);
         let cities = city_sprites_ticker(&hexagons, &city);
 
         window.set_view(&new_view);
         window.clear(Color::BLACK);
 
-        city_ui = new_city_ui;
-        city_ui_text = new_city_ui_text;
-
         sprites.iter().for_each(|sprite| window.draw(sprite));
         background_grid.iter().for_each(|shape| window.draw(shape));
         cities.iter().for_each(|shape| window.draw(shape));
         //texts.iter().for_each(|text| window.draw(text));
-        city_ui.iter().for_each(|panel| window.draw(panel));
-        city_ui_text.iter().for_each(|text| window.draw(text));
+        if let Some(interface) = &city_interface {
+            interface.draw(&mut window);
+        }
 
         window.display();
     }
