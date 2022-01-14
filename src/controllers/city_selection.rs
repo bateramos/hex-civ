@@ -1,10 +1,10 @@
 use sfml::{graphics::*, window::*};
 
-use crate::{HexagonColumn, HexagonCategory, Hexagon};
+use crate::{HexagonCategory, Hexagon, State};
 
-pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &HexagonColumn, Option<Hexagon>) -> Option<Hexagon>> {
-    Box::new(move |view, events, hexagons, selected_city| {
-        let mut closest : Option<Hexagon> = selected_city;
+pub fn init_city_selection(scale: f32) -> Box<dyn for<'a> Fn(&View, &Vec<Event>, State<'a>) -> State<'a>> {
+    Box::new(move |view, events, mut state| {
+        let mut closest : Option<Hexagon> = state.selected_city;
         let center = view.center();
 
         events.iter().for_each(|event| {
@@ -13,7 +13,7 @@ pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &Hexago
                     if mouse::Button::RIGHT == *button {
                         closest = None
                     } else if mouse::Button::LEFT == *button {
-                        if let Some(_) = selected_city {
+                        if let Some(_) = state.selected_city {
                             return
                         }
                         let mut x_index = (center.x / (40. * scale)) as usize;
@@ -28,7 +28,7 @@ pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &Hexago
 
                         let mut candidates = Vec::new();
 
-                        if let Some(line) = hexagons.get(y_index + 1) {
+                        if let Some(line) = state.hexagons.get(y_index + 1) {
                             if let Some(hex) = line.get(x_index - 1) {
                                 candidates.push(hex);
                             }
@@ -39,12 +39,12 @@ pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &Hexago
                                 candidates.push(hex);
                             }
                         }
-                        if let Some(line) = hexagons.get(y_index) {
+                        if let Some(line) = state.hexagons.get(y_index) {
                             if let Some(hex) = line.get(x_index) {
                                 candidates.push(hex);
                             }
                         }
-                        if let Some(line) = hexagons.get(y_index - 1) {
+                        if let Some(line) = state.hexagons.get(y_index - 1) {
                             if let Some(hex) = line.get(x_index - 1) {
                                 candidates.push(hex);
                             }
@@ -80,6 +80,7 @@ pub fn init_city_selection(scale: f32) -> Box<dyn Fn(&View, &Vec<Event>, &Hexago
             }
         });
 
-        closest
+        state.selected_city = closest;
+        state
     })
 }

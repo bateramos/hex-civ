@@ -1,18 +1,20 @@
-use sfml::{graphics::*, system::*};
+use sfml::graphics::*;
 
-use crate::HexagonColumn;
+use crate::State;
 
-pub fn init_city_sprites<'a>(y_offset: f32) -> Box<dyn Fn(&'a HexagonColumn, &'a Sprite) -> Vec<Sprite<'a>>> {
-    Box::new(move |hexagons, city_sprite| {
+pub fn init_city_sprites<'a>() -> Box<dyn Fn(State<'a>, &'a Sprite) -> State<'a>> {
+    Box::new(|mut state, city_sprite| {
         let mut cities = Vec::new();
 
         let mut city = city_sprite.clone();
-        let hexagon = hexagons[3][3];
-        city.set_position(Vector2f { x: hexagon.position.x, y: hexagon.position.y - y_offset});
+        let hexagon = state.hexagons[3][3];
+        city.set_position(hexagon.sprite_position);
 
         cities.push(city);
 
-        cities.to_vec()
+        state.cities = cities;
+
+        state
     })
 }
 

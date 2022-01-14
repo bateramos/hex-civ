@@ -1,7 +1,9 @@
 use sfml::window::*;
 
-pub fn init_key_handler() -> Box<dyn Fn(&Vec<Event>)> {
-    Box::new(|events| {
+use crate::State;
+
+pub fn init_key_handler() -> Box<dyn for<'a> Fn(&Vec<Event>, State<'a>) -> State<'a>> {
+    Box::new(|events, state| {
         events.iter().for_each(|event| {
             match event {
                 Event::Closed | Event::KeyPressed {
@@ -12,5 +14,6 @@ pub fn init_key_handler() -> Box<dyn Fn(&Vec<Event>)> {
                 _ => {}
             };
         });
+        state
     })
 }
