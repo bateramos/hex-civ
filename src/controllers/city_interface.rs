@@ -1,6 +1,7 @@
 use sfml::{graphics::*, system::*};
 
-use crate::{Hexagon, State};
+use crate::State;
+use crate::controllers::LoadedTextures;
 
 struct Button <'a> {
     panel: RectangleShape<'a>,
@@ -34,8 +35,8 @@ impl <'a> CityInterface<'a> {
     }
 }
 
-pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'a, 'b> Fn(&'b Font, &'b Sprite, &View, State<'b>) -> State<'b>> {
-    Box::new(move |font, pillar_sprite, view, mut state| {
+pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'a, 'b> Fn(&'b Font, &'b LoadedTextures, &View, State<'b>) -> State<'b>> {
+    Box::new(move |font, textures, view, mut state| {
         match state.selected_city {
             Some(_selected_city) => {
                 if state.city_interface.is_none() {
@@ -48,6 +49,8 @@ pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'a,
 
                     let mut text = Text::new(&format!("SUPER COOL CITY"), &font, (10. * scale) as u32);
                     text.set_position(Vector2f { x: x0 + (screen_size.x / 2.) - (text.global_bounds().width / 2.), y: y0 + 16. * scale });
+
+                    let pillar_sprite = textures.pillar.clone();
 
                     let mut right_pillar = pillar_sprite.clone();
                     let mut left_pillar = pillar_sprite.clone();
