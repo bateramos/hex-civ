@@ -58,22 +58,22 @@ pub fn init_city_selection(scale: f32) -> Box<dyn for<'a> Fn(&View, &Vec<Event>,
 
                         let mut closest_distance = f32::MAX;
                         candidates.iter().for_each(|hex| {
-                            match hex.category {
-                                HexagonCategory::CITY => {
-                                    let distance = (
-                                        (hex.center.x - center.x as f32).powf(2.) +
-                                        (hex.center.y - center.y as f32).powf(2.)
-                                    ).sqrt();
+                            let distance = (
+                                (hex.center.x - center.x as f32).powf(2.) +
+                                (hex.center.y - center.y as f32).powf(2.)
+                            ).sqrt();
 
-                                    if distance < closest_distance {
-                                        closest = Some(**hex);
-                                        closest_distance = distance;
-                                    }
-                                    println!("{} - {:?}", closest_distance, closest.unwrap().category);
-                                },
-                                _ => {},
+                            if distance < closest_distance {
+                                closest = Some(**hex);
+                                closest_distance = distance;
                             }
                         });
+
+                        if let Some(c) = closest {
+                            if c.category != HexagonCategory::CITY {
+                                closest.take();
+                            }
+                        }
                     }
                 },
                 _ => {}

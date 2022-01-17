@@ -3,7 +3,7 @@ use sfml::{system::*, graphics::*};
 pub type HexagonLine = Vec<Hexagon>;
 pub type HexagonColumn = Vec<HexagonLine>;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HexagonCategory {
     FIELD,
     CITY,
