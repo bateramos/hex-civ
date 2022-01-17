@@ -3,16 +3,39 @@ use sfml::{graphics::*, system::*};
 use crate::State;
 use crate::controllers::LoadedTextures;
 
-struct Button <'a> {
-    panel: RectangleShape<'a>,
-    text: Text<'a>,
-    on_click: Box<dyn Fn() -> ()>,
+pub trait Drawable {
+    fn draw(&self, render_target: &mut dyn RenderTarget);
 }
 
-impl <'a> Button<'a> {
-    pub fn draw(&self, render_target: &mut dyn RenderTarget) {
+pub trait Actionable {
+    fn on_action(&self) -> String;
+    fn bounds(&self) -> FloatRect;
+}
+
+pub trait ActionButton: Actionable + Drawable {}
+
+pub struct Button <'a> {
+    panel: RectangleShape<'a>,
+    text: Text<'a>,
+    on_click: String,
+}
+
+impl <'a> ActionButton for Button<'a> {}
+
+impl <'a> Drawable for Button<'a> {
+    fn draw(&self, render_target: &mut dyn RenderTarget) {
         render_target.draw(&self.panel);
         render_target.draw(&self.text);
+    }
+}
+
+impl <'a> Actionable for Button<'a> {
+    fn on_action(&self) -> String {
+        self.on_click.clone()
+    }
+
+    fn bounds(&self) -> FloatRect {
+        self.panel.global_bounds()
     }
 }
 
@@ -21,22 +44,27 @@ pub struct CityInterface <'a> {
     text: Text<'a>,
     left_pillar: Sprite<'a>,
     right_pillar: Sprite<'a>,
-    exit_button: Button<'a>,
+    pub exit_button: Button<'a>,
 }
 
-impl <'a> CityInterface<'a> {
-    pub fn draw(&self, render_target: &mut dyn RenderTarget) {
+impl <'a> Drawable for CityInterface<'a> {
+    fn draw(&self, render_target: &mut dyn RenderTarget) {
         render_target.draw(&self.panel);
         render_target.draw(&self.text);
         render_target.draw(&self.left_pillar);
         render_target.draw(&self.right_pillar);
-
         self.exit_button.draw(render_target);
     }
 }
 
-pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'a, 'b> Fn(&'b Font, &'b LoadedTextures, &View, State<'b>) -> State<'b>> {
+pub const CITY_INTERFACE_EXIT_EVENT : &str = "city_interface_exit";
+
+pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'b> Fn(&'b Font, &'b LoadedTextures, &View, State<'b>) -> State<'b>> {
     Box::new(move |font, textures, view, mut state| {
+        if state.dispatched_events.contains(&CITY_INTERFACE_EXIT_EVENT.to_owned()) {
+            state.selected_city.take();
+        }
+
         match state.selected_city {
             Some(_selected_city) => {
                 if state.city_interface.is_none() {
@@ -66,10 +94,7 @@ pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'a,
                         button_panel.set_position(Vector2f { x: button_text.global_bounds().left - padding * 2., y: button_text.global_bounds().top - padding });
                         button_panel.set_fill_color(Color::rgb(60, 38, 49));
 
-                        let on_click = || {
-                        };
-
-                        Button { panel: button_panel, text: button_text, on_click: Box::new(on_click) }
+                        Button { panel: button_panel, text: button_text, on_click: CITY_INTERFACE_EXIT_EVENT.to_owned() }
                     };
 
                     state.city_interface.replace(CityInterface { panel, text, right_pillar, left_pillar, exit_button });

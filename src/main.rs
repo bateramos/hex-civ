@@ -17,6 +17,9 @@ use controllers::{
     init_city_sprites,
     init_textures,
     CityInterface,
+    Drawable,
+    Actionable,
+    ActionButton,
 };
 
 type Resolution = (u32, u32, f32);
@@ -34,7 +37,6 @@ pub struct State <'a> {
     selected_city: Option<Hexagon>,
 
     dispatched_events: Vec<String>,
-    on_clicks: Vec<(Rect<f32>, Box<dyn Fn() -> State<'a>>)>,
     cities: Vec<Sprite<'a>>,
 }
 
@@ -85,7 +87,7 @@ fn main() {
 
     let textures = init_textures(scale, &texture, &texture_pillar);
 
-    let (mut hexagons, sprites, background_grid)  = init_map_creation(scale, seed, &textures);
+    let (mut hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
     hexagons = init_city_placement(hexagons);
 
     println!("{:?}", new_view.size());
@@ -102,7 +104,6 @@ fn main() {
         hexagons,
         dispatched_events: Vec::new(),
 
-        on_clicks: Vec::new(),
         cities: Vec::new(),
     };
 
@@ -124,12 +125,26 @@ fn main() {
         sprites.iter().for_each(|sprite: &Sprite| window.draw(sprite));
         background_grid.iter().for_each(|shape| window.draw(shape));
         state.cities.iter().for_each(|shape| window.draw(shape));
+
+        state.dispatched_events.clear();
+
         //texts.iter().for_each(|text| window.draw(text));
         if let Some(interface) = &state.city_interface {
             interface.draw(&mut window);
+            events.iter().for_each(|event| {
+                match event {
+                    Event::MouseButtonPressed { button, .. } => {
+                        if mouse::Button::LEFT == *button {
+                            let mouse_position = window.map_pixel_to_coords_current_view(window.mouse_position());
+                            if interface.exit_button.bounds().contains(mouse_position) {
+                                state.dispatched_events.push(interface.exit_button.on_action());
+                            }
+                        }
+                    },
+                    _ => {},
+                }
+            });
         }
-
-        state.drain_one_event();
 
         window.display();
     }
