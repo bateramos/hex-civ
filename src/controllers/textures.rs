@@ -2,6 +2,7 @@ use sfml::{graphics::*, system::*};
 
 pub struct LoadedTextures <'a> {
     pub pillar: Sprite<'a>,
+
     pub green_field: Sprite<'a>,
     pub forest: Sprite<'a>,
     pub dense_forest: Sprite<'a>,
@@ -11,6 +12,8 @@ pub struct LoadedTextures <'a> {
     pub city: Sprite<'a>,
     pub snow: Sprite<'a>,
     pub snow_with_tress: Sprite<'a>,
+
+    pub pikeman: Sprite<'a>,
 }
 
 pub const SPRITE_X_PADDING : i32 = 32;
@@ -23,7 +26,7 @@ fn load_texture<'a>(texture: &'a Texture, x: i32, y: i32, scale_x: f32, scale_y:
     sprite
 }
 
-pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a Texture) -> LoadedTextures<'a> {
+pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a Texture, texture_pikeman: &'a Texture) -> LoadedTextures<'a> {
     let mut pillar = Sprite::with_texture_and_rect(&texture_pillar, &IntRect::new(0, 0, 50, 160));
     pillar.set_scale(Vector2f {x: scale, y: 1.9 * scale});
 
@@ -43,8 +46,12 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let snow = load_texture(&texture, 0, 2, x_scale, y_scale);
     let snow_with_tress  = load_texture(&texture, 1, 2, x_scale, y_scale);
 
+    let mut pikeman = Sprite::with_texture_and_rect(&texture_pikeman, &IntRect::new(0, 0, 48, 88));
+    pikeman.set_scale(Vector2f {x: 0.4 * scale, y: 0.4 * scale});
+
     LoadedTextures {
         pillar,
+
         green_field,
         forest,
         dense_forest,
@@ -54,5 +61,7 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
         city,
         snow,
         snow_with_tress,
+
+        pikeman,
     }
 }

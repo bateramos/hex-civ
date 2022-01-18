@@ -5,6 +5,10 @@ mod city_placement;
 mod city_selection;
 mod city_interface;
 mod city_sprites;
+mod unit_placement;
+mod unit_sprite;
+mod unit_selection;
+mod unit_selection_effect;
 mod textures;
 
 pub use textures::*;
@@ -15,3 +19,7 @@ pub use city_placement::init_city_placement;
 pub use city_selection::init_city_selection;
 pub use city_interface::{init_city_interface, CityInterface, Drawable, Actionable, ActionButton};
 pub use city_sprites::init_city_sprites;
+pub use unit_placement::init_unit_placement;
+pub use unit_sprite::init_unit_sprite;
+pub use unit_selection::init_unit_selection;
+pub use unit_selection_effect::init_unit_selection_effect;

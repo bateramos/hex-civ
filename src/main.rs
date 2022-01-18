@@ -4,23 +4,12 @@ use rand;
 
 mod controllers;
 mod entities;
+mod utils;
 
 use entities::*;
 
-use controllers::{
-    init_map_navigation,
-    init_map_creation,
-    init_key_handler,
-    init_city_placement,
-    init_city_selection,
-    init_city_interface,
-    init_city_sprites,
-    init_textures,
-    CityInterface,
-    Drawable,
-    Actionable,
-    ActionButton,
-};
+use controllers::*;
+use controllers::{Drawable, Actionable};
 
 type Resolution = (u32, u32, f32);
 
@@ -31,40 +20,11 @@ fn resolutions() -> Vec<Resolution> {
     ]
 }
 
-pub struct State <'a> {
-    city_interface: Option<CityInterface<'a>>,
-    hexagons: HexagonColumn,
-    selected_city: Option<Hexagon>,
-
-    dispatched_events: Vec<String>,
-    cities: Vec<Sprite<'a>>,
-}
-
-impl <'a> State <'a> {
-    pub fn dispatch_event(&mut self, event: String) {
-        self.dispatched_events.insert(0, event);
-    }
-
-    pub fn drain_one_event(&mut self) {
-        if let Some(last) = self.dispatched_events.last() {
-            if last == "empty" {
-                return
-            }
-        }
-
-        self.dispatched_events.pop();
-
-        if self.dispatched_events.is_empty() {
-            self.dispatched_events.push("empty".to_string());
-        }
-    }
-}
-
 fn main() {
     let res_index = &std::env::args().collect::<Vec<String>>()[1];
     let resolution : Resolution = resolutions()[res_index.parse::<usize>().unwrap_or(0)];
     let scale = resolution.2;
-    let _grid_size = (30, 20);
+    let grid_size = (30, 20);
     let seed = rand::random::<u64>() % 10000;
 
     println!("Resolution: {:?}; Seed: {};", resolution, seed);
@@ -84,8 +44,9 @@ fn main() {
     let font = Font::from_file("res/fonts/Seagram tfb.ttf").unwrap();
     let texture = Texture::from_file("res/textures/main.png").unwrap();
     let texture_pillar = Texture::from_file("res/textures/pillar.png").unwrap();
+    let texture_pikeman = Texture::from_file("res/textures/pikeman.png").unwrap();
 
-    let textures = init_textures(scale, &texture, &texture_pillar);
+    let textures = init_textures(scale, &texture, &texture_pillar, &texture_pikeman);
 
     let (mut hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
     hexagons = init_city_placement(hexagons);
@@ -97,17 +58,18 @@ fn main() {
     let city_selection_ticker = init_city_selection(scale);
     let city_interface_ticker = init_city_interface(scale, new_view.size());
     let city_sprites_ticker = init_city_sprites();
+    let unit_placement = init_unit_placement();
+    let unit_sprite = init_unit_sprite(scale);
+    let unit_selection = init_unit_selection(scale);
+    let unit_selection_effect = init_unit_selection_effect();
 
-    let mut state = State {
-        city_interface: None,
-        selected_city: Some(hexagons[3][3]),
-        hexagons,
-        dispatched_events: Vec::new(),
+    let mut state = State::new(hexagons, grid_size);
+    state.units[4][4] = Some(UnitType::Pikeman);
 
-        cities: Vec::new(),
-    };
+    let mut clock = Clock::start();
 
     loop {
+        clock.restart();
         let mut events = Vec::new();
         while let Some(event) = window.poll_event() {
             events.push(event);
@@ -118,6 +80,10 @@ fn main() {
         state = city_selection_ticker(&new_view, &events, state);
         state = city_interface_ticker(&font, &textures, &new_view, state);
         state = city_sprites_ticker(state, &textures);
+        state = unit_placement(state);
+        state = unit_sprite(state, &textures);
+        state = unit_selection(state, &events, &new_view);
+        state = unit_selection_effect(state);
 
         window.set_view(&new_view);
         window.clear(Color::BLACK);
@@ -125,10 +91,10 @@ fn main() {
         sprites.iter().for_each(|sprite: &Sprite| window.draw(sprite));
         background_grid.iter().for_each(|shape| window.draw(shape));
         state.cities.iter().for_each(|shape| window.draw(shape));
+        state.units_sprites.iter().for_each(|shape| window.draw(shape));
 
         state.dispatched_events.clear();
 
-        //texts.iter().for_each(|text| window.draw(text));
         if let Some(interface) = &state.city_interface {
             interface.draw(&mut window);
             events.iter().for_each(|event| {
@@ -145,6 +111,8 @@ fn main() {
                 }
             });
         }
+
+        state.tick_time = clock.elapsed_time().as_milliseconds() as f32;
 
         window.display();
     }
