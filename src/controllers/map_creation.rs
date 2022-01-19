@@ -69,7 +69,7 @@ pub fn init_map_creation<'a>(scale: f32, seed: u64, textures: &'a LoadedTextures
 
             let hexagon = Hexagon {
                 id: rand::random::<u32>(), category: HexagonCategory::FIELD,
-                scale, position: Vector2f { x, y }, center, sprite_position,
+                scale, position: Vector2f { x, y }, center, sprite_position, grid_position: (x_i, y_i),
                 fill_color: Color::TRANSPARENT, outline_color: Color::rgba(86, 84, 85, 51), thickness: 1.,
             };
 

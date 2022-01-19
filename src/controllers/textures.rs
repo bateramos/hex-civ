@@ -39,7 +39,7 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let hill = load_texture(&texture, 3, 0, x_scale, y_scale);
     let hill_with_trees = load_texture(&texture, 4, 0, x_scale, y_scale);
 
-    let y_scale = 0.9 * scale;
+    let y_scale = 0.8 * scale;
 
     let city = load_texture(&texture, 0, 1, x_scale, y_scale);
     let mountain = load_texture(&texture, 5, 0, x_scale, y_scale);

@@ -19,6 +19,9 @@ pub fn init_unit_sprite<'a>(scale: f32) -> Box<dyn Fn(State<'a>, &'a LoadedTextu
                 }
             }
         }
+        if units.is_empty() {
+            println!("Empty");
+        }
 
         state.units_sprites = units;
 

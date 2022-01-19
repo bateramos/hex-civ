@@ -3,12 +3,12 @@ use sfml::{window::*, graphics::*};
 use crate::utils::find_with_location;
 use crate::entities::{State, Hexagon, HexagonCategory};
 
-pub fn init_unit_selection<'a>(scale: f32) -> Box<dyn Fn(State<'a>, &Vec<Event>, &View) -> State<'a>> {
-    Box::new(move |mut state, events, view| {
+pub fn init_unit_selection<'a>(scale: f32) -> Box<dyn Fn(State<'a>, &View) -> State<'a>> {
+    Box::new(move |mut state, view| {
         let mut closest : Option<Hexagon> = state.unit_selected;
         let center = view.center();
 
-        events.iter().for_each(|event| {
+        state.events.iter().for_each(|event| {
             match event {
                 Event::MouseButtonPressed { button, .. } => {
                     if mouse::Button::RIGHT == *button {

@@ -1,4 +1,5 @@
 use sfml::graphics::Sprite;
+use sfml::window::Event;
 
 use crate::entities::*;
 use crate::controllers::*;
@@ -10,6 +11,7 @@ pub struct State <'a> {
     pub hexagons: HexagonColumn,
     pub selected_city: Option<Hexagon>,
 
+    pub events: Vec<Event>,
     pub dispatched_events: Vec<String>,
     pub cities: Vec<Sprite<'a>>,
 
@@ -29,6 +31,8 @@ impl <'a> State <'a> {
             city_interface: None,
             selected_city: None,
             hexagons,
+
+            events: Vec::new(),
             dispatched_events: Vec::new(),
 
             cities: Vec::new(),

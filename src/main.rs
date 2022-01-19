@@ -11,6 +11,9 @@ use entities::*;
 use controllers::*;
 use controllers::{Drawable, Actionable};
 
+type GraphicsContext = ();
+type ControlFn = Box<dyn Fn(State, GraphicsContext) -> State>;
+
 type Resolution = (u32, u32, f32);
 
 fn resolutions() -> Vec<Resolution> {
@@ -51,20 +54,21 @@ fn main() {
     let (mut hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
     hexagons = init_city_placement(hexagons);
 
-    println!("{:?}", new_view.size());
+    let mut control_fns = Vec::new();
 
     let map_navigation_ticker = init_map_navigation(new_view.center());
     let key_handler_ticker = init_key_handler();
     let city_selection_ticker = init_city_selection(scale);
     let city_interface_ticker = init_city_interface(scale, new_view.size());
     let city_sprites_ticker = init_city_sprites();
-    let unit_placement = init_unit_placement();
     let unit_sprite = init_unit_sprite(scale);
     let unit_selection = init_unit_selection(scale);
     let unit_selection_effect = init_unit_selection_effect();
+    control_fns.push(init_unit_movement());
 
     let mut state = State::new(hexagons, grid_size);
     state.units[4][4] = Some(UnitType::Pikeman);
+    state.unit_selected = Some(state.hexagons[4][4]);
 
     let mut clock = Clock::start();
 
@@ -75,15 +79,21 @@ fn main() {
             events.push(event);
         }
 
-        state = map_navigation_ticker(&mut new_view, &events, state);
-        state = key_handler_ticker(&events, state);
-        state = city_selection_ticker(&new_view, &events, state);
+        state.events = events;
+
+
+        state = map_navigation_ticker(&mut new_view, state);
+        state = key_handler_ticker(state);
+        state = city_selection_ticker(&new_view, state);
         state = city_interface_ticker(&font, &textures, &new_view, state);
         state = city_sprites_ticker(state, &textures);
-        state = unit_placement(state);
         state = unit_sprite(state, &textures);
-        state = unit_selection(state, &events, &new_view);
+        state = unit_selection(state, &new_view);
         state = unit_selection_effect(state);
+
+        state = control_fns.iter().fold(state, |state, fun| {
+            (fun)(state, ())
+        });
 
         window.set_view(&new_view);
         window.clear(Color::BLACK);
@@ -93,11 +103,22 @@ fn main() {
         state.cities.iter().for_each(|shape| window.draw(shape));
         state.units_sprites.iter().for_each(|shape| window.draw(shape));
 
+        /*
+        state.hexagons.iter().for_each(|line| {
+            line.iter().for_each(|hex| {
+                let mut text = Text::new(&format!("{:?}", hex.grid_position), &font, (4. * scale) as u32);
+                text.set_fill_color(Color::RED);
+                text.set_position(hex.center);
+                window.draw(&text);
+            });
+        });
+        */
+
         state.dispatched_events.clear();
 
         if let Some(interface) = &state.city_interface {
             interface.draw(&mut window);
-            events.iter().for_each(|event| {
+            state.events.iter().for_each(|event| {
                 match event {
                     Event::MouseButtonPressed { button, .. } => {
                         if mouse::Button::LEFT == *button {

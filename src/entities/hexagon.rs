@@ -21,6 +21,7 @@ pub struct Hexagon {
     pub center: Vector2f,
     pub sprite_position: Vector2f,
     pub category: HexagonCategory,
+    pub grid_position: (usize, usize),
 }
 
 impl Hexagon {
