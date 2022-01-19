@@ -1,9 +1,9 @@
 use sfml::graphics::*;
 
-use crate::entities::State;
+use crate::ControlFn;
 
-pub fn init_unit_selection_effect<'a>() -> Box<dyn Fn(State<'a>) -> State<'a>> {
-    Box::new(|mut state| {
+pub fn init_unit_selection_effect() -> ControlFn {
+    Box::new(|mut state, _graphics| {
         if let Some(_unit) = state.unit_selected {
             let mut timer = state.unit_selection_effect_timer;
             timer += state.tick_time;

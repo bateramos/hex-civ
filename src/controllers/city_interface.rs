@@ -1,7 +1,6 @@
 use sfml::{graphics::*, system::*};
 
-use crate::State;
-use crate::controllers::LoadedTextures;
+use crate::ControlFn;
 
 pub trait Drawable {
     fn draw(&self, render_target: &mut dyn RenderTarget);
@@ -59,8 +58,8 @@ impl <'a> Drawable for CityInterface<'a> {
 
 pub const CITY_INTERFACE_EXIT_EVENT : &str = "city_interface_exit";
 
-pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'b> Fn(&'b Font, &'b LoadedTextures, &View, State<'b>) -> State<'b>> {
-    Box::new(move |font, textures, view, mut state| {
+pub fn init_city_interface(scale: f32) -> ControlFn {
+    Box::new(move |mut state, graphics| {
         if state.dispatched_events.contains(&CITY_INTERFACE_EXIT_EVENT.to_owned()) {
             state.selected_city.take();
         }
@@ -68,27 +67,30 @@ pub fn init_city_interface(scale: f32, screen_size: Vector2f) -> Box<dyn for<'b>
         match state.selected_city {
             Some(_selected_city) => {
                 if state.city_interface.is_none() {
-                    let x0 = view.center().x - view.size().x / 2.;
-                    let y0 = view.center().y - view.size().y / 2.;
+                    let view_size = graphics.view_size;
+                    let view_center = graphics.view_center;
 
-                    let mut panel = RectangleShape::with_size(Vector2f { x: screen_size.x, y: 34. * scale });
+                    let x0 = view_center.x - view_size.x / 2.;
+                    let y0 = view_center.y - view_size.y / 2.;
+
+                    let mut panel = RectangleShape::with_size(Vector2f { x: view_size.x, y: 34. * scale });
                     panel.set_position(Vector2f { x: x0, y: y0 + 2. * scale });
                     panel.set_fill_color(Color::rgba(100, 16, 58, 91));
 
-                    let mut text = Text::new(&format!("SUPER COOL CITY"), &font, (10. * scale) as u32);
-                    text.set_position(Vector2f { x: x0 + (screen_size.x / 2.) - (text.global_bounds().width / 2.), y: y0 + 16. * scale });
+                    let mut text = Text::new(&format!("SUPER COOL CITY"), &graphics.font, (10. * scale) as u32);
+                    text.set_position(Vector2f { x: x0 + (view_size.x / 2.) - (text.global_bounds().width / 2.), y: y0 + 16. * scale });
 
-                    let pillar_sprite = textures.pillar.clone();
+                    let pillar_sprite = graphics.textures.pillar.clone();
 
                     let mut right_pillar = pillar_sprite.clone();
                     let mut left_pillar = pillar_sprite.clone();
                     right_pillar.set_position(Vector2f {x: x0 - 6., y: y0});
-                    left_pillar.set_position(Vector2f {x: x0 + view.size().x - 40. * scale, y: y0});
+                    left_pillar.set_position(Vector2f {x: x0 + view_size.x - 40. * scale, y: y0});
 
                     let exit_button = {
                         let padding = 5. * scale;
-                        let mut button_text = Text::new(&format!("EXIT"), &font, (10. * scale) as u32);
-                        button_text.set_position(Vector2f { x: x0 + 90. * scale, y: y0 + screen_size.y - 30. * scale });
+                        let mut button_text = Text::new(&format!("EXIT"), &graphics.font, (10. * scale) as u32);
+                        button_text.set_position(Vector2f { x: x0 + 90. * scale, y: y0 + view_size.y - 30. * scale });
 
                         let mut button_panel = RectangleShape::with_size(Vector2f { x: button_text.global_bounds().width + padding * 4., y: button_text.global_bounds().height + padding * 2. });
                         button_panel.set_position(Vector2f { x: button_text.global_bounds().left - padding * 2., y: button_text.global_bounds().top - padding });

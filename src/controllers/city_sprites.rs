@@ -1,13 +1,12 @@
 use sfml::graphics::*;
 
-use crate::State;
-use crate::controllers::LoadedTextures;
+use crate::ControlFn;
 
-pub fn init_city_sprites<'a>() -> Box<dyn Fn(State<'a>, &'a LoadedTextures) -> State<'a>> {
-    Box::new(|mut state, textures| {
+pub fn init_city_sprites<'a>() -> ControlFn {
+    Box::new(|mut state, graphics| {
         let mut cities = Vec::new();
 
-        let mut city = textures.city.clone();
+        let mut city = graphics.textures.city.clone();
         let hexagon = state.hexagons[3][3];
         city.set_position(hexagon.sprite_position);
 

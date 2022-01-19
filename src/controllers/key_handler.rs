@@ -1,9 +1,9 @@
 use sfml::window::*;
 
-use crate::State;
+use crate::ControlFn;
 
-pub fn init_key_handler() -> Box<dyn for<'a> Fn(State<'a>) -> State<'a>> {
-    Box::new(|state| {
+pub fn init_key_handler() -> ControlFn {
+    Box::new(|state, _graphics| {
         state.events.iter().for_each(|event| {
             match event {
                 Event::Closed | Event::KeyPressed {

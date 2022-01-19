@@ -1,9 +1,9 @@
-use sfml::{graphics::*, system::*, window::*};
+use sfml::{system::*, window::*};
 
-use crate::State;
+use crate::ControlGraphicsFn;
 
-pub fn init_map_navigation(center: Vector2f) -> Box<dyn for<'a> Fn(&mut View, State<'a>) -> State<'a>> {
-    Box::new(move |view, state| {
+pub fn init_map_navigation(center: Vector2f) -> ControlGraphicsFn {
+    Box::new(move |mut view, state, _graphics| {
         if state.selected_city.is_none() {
             state.events.iter().for_each(|event| {
                 match event {
@@ -21,6 +21,6 @@ pub fn init_map_navigation(center: Vector2f) -> Box<dyn for<'a> Fn(&mut View, St
             });
         }
 
-        state
+        view
     })
 }

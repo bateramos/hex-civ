@@ -1,4 +1,5 @@
 use sfml::{graphics::*, system::*, window::*};
+use sfml::SfBox;
 
 use rand;
 
@@ -11,8 +12,15 @@ use entities::*;
 use controllers::*;
 use controllers::{Drawable, Actionable};
 
-type GraphicsContext = ();
-type ControlFn = Box<dyn Fn(State, GraphicsContext) -> State>;
+pub struct GraphicsContext <'a> {
+    pub textures: &'a LoadedTextures<'a>,
+    pub font: &'a Font,
+    pub view_center: Vector2f,
+    pub view_size: Vector2f,
+}
+
+type ControlFn = Box<dyn for<'a> Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>;
+type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>) -> SfBox<View>>;
 
 type Resolution = (u32, u32, f32);
 
@@ -54,26 +62,35 @@ fn main() {
     let (mut hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
     hexagons = init_city_placement(hexagons);
 
-    let mut control_fns = Vec::new();
+    let control_fns = vec![
+        init_key_handler(),
+        init_city_selection(scale),
+        init_city_sprites(),
+        init_city_interface(scale),
+        init_unit_selection(scale),
+        init_unit_sprite(scale),
+        init_unit_selection_effect(),
+        init_unit_movement(),
+    ];
 
-    let map_navigation_ticker = init_map_navigation(new_view.center());
-    let key_handler_ticker = init_key_handler();
-    let city_selection_ticker = init_city_selection(scale);
-    let city_interface_ticker = init_city_interface(scale, new_view.size());
-    let city_sprites_ticker = init_city_sprites();
-    let unit_sprite = init_unit_sprite(scale);
-    let unit_selection = init_unit_selection(scale);
-    let unit_selection_effect = init_unit_selection_effect();
-    control_fns.push(init_unit_movement());
+    let control_graphic_fns = vec![
+        init_map_navigation(new_view.center()),
+    ];
 
+    let mut graphics = GraphicsContext {
+        textures: &textures,
+        font: &font,
+        view_center: Vector2f{ x: 0., y: 0. },
+        view_size: new_view.size(),
+    };
     let mut state = State::new(hexagons, grid_size);
     state.units[4][4] = Some(UnitType::Pikeman);
-    state.unit_selected = Some(state.hexagons[4][4]);
 
     let mut clock = Clock::start();
 
     loop {
         clock.restart();
+
         let mut events = Vec::new();
         while let Some(event) = window.poll_event() {
             events.push(event);
@@ -81,18 +98,14 @@ fn main() {
 
         state.events = events;
 
+        new_view = control_graphic_fns.iter().fold(new_view, |new_view, fun| {
+            (fun)(new_view, &state, &graphics)
+        });
 
-        state = map_navigation_ticker(&mut new_view, state);
-        state = key_handler_ticker(state);
-        state = city_selection_ticker(&new_view, state);
-        state = city_interface_ticker(&font, &textures, &new_view, state);
-        state = city_sprites_ticker(state, &textures);
-        state = unit_sprite(state, &textures);
-        state = unit_selection(state, &new_view);
-        state = unit_selection_effect(state);
+        graphics.view_center = new_view.center();
 
         state = control_fns.iter().fold(state, |state, fun| {
-            (fun)(state, ())
+            (fun)(state, &graphics)
         });
 
         window.set_view(&new_view);

@@ -1,12 +1,13 @@
-use sfml::{window::*, graphics::*};
+use sfml::window::*;
 
 use crate::utils::find_with_location;
-use crate::entities::{State, Hexagon, HexagonCategory};
+use crate::entities::Hexagon;
+use crate::ControlFn;
 
-pub fn init_unit_selection<'a>(scale: f32) -> Box<dyn Fn(State<'a>, &View) -> State<'a>> {
-    Box::new(move |mut state, view| {
+pub fn init_unit_selection<'a>(scale: f32) -> ControlFn {
+    Box::new(move |mut state, graphics| {
         let mut closest : Option<Hexagon> = state.unit_selected;
-        let center = view.center();
+        let center = graphics.view_center;
 
         state.events.iter().for_each(|event| {
             match event {
@@ -21,7 +22,7 @@ pub fn init_unit_selection<'a>(scale: f32) -> Box<dyn Fn(State<'a>, &View) -> St
                         closest = find_with_location(center, scale, &state.hexagons);
 
                         if let Some(c) = closest {
-                            if c.category != HexagonCategory::UNIT {
+                            if let None = state.units[c.grid_position.1][c.grid_position.0] {
                                 closest.take();
                             }
                         }

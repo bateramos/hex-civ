@@ -1,12 +1,13 @@
-use sfml::{graphics::*, window::*};
+use sfml::window::*;
 
 use crate::utils::find_with_location;
-use crate::entities::{State, Hexagon, HexagonCategory};
+use crate::entities::{Hexagon, HexagonCategory};
+use crate::ControlFn;
 
-pub fn init_city_selection(scale: f32) -> Box<dyn for<'a> Fn(&View, State<'a>) -> State<'a>> {
-    Box::new(move |view, mut state| {
+pub fn init_city_selection(scale: f32) -> ControlFn {
+    Box::new(move |mut state, graphics| {
         let mut closest : Option<Hexagon> = state.selected_city;
-        let center = view.center();
+        let center = graphics.view_center;
 
         state.events.iter().for_each(|event| {
             match event {

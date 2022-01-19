@@ -7,7 +7,6 @@ pub type HexagonColumn = Vec<HexagonLine>;
 pub enum HexagonCategory {
     FIELD,
     CITY,
-    UNIT,
 }
 
 #[derive(Clone, Copy, Debug)]
