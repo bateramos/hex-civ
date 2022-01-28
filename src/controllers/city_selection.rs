@@ -1,7 +1,7 @@
 use sfml::window::*;
 
 use crate::utils::find_with_location;
-use crate::entities::{Hexagon, HexagonCategory};
+use crate::entities::Hexagon;
 use crate::ControlFn;
 
 pub fn init_city_selection(scale: f32) -> ControlFn {
@@ -22,7 +22,7 @@ pub fn init_city_selection(scale: f32) -> ControlFn {
                         closest = find_with_location(center, scale, &state.hexagons);
 
                         if let Some(c) = closest {
-                            if c.category != HexagonCategory::CITY {
+                            if let None = state.cities[c.grid_position.1][c.grid_position.0] {
                                 closest.take();
                             }
                         }

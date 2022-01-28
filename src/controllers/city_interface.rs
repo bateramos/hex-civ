@@ -1,5 +1,6 @@
 use sfml::{graphics::*, system::*};
 
+use crate::entities::{HexEvent, UnitType, Unit};
 use crate::ControlFn;
 
 pub trait Drawable {
@@ -43,7 +44,9 @@ pub struct CityInterface <'a> {
     text: Text<'a>,
     left_pillar: Sprite<'a>,
     right_pillar: Sprite<'a>,
+    city_hex_position: Vector2i,
     pub exit_button: Button<'a>,
+    pub build_unit_button: Button<'a>,
 }
 
 impl <'a> Drawable for CityInterface<'a> {
@@ -53,20 +56,52 @@ impl <'a> Drawable for CityInterface<'a> {
         render_target.draw(&self.left_pillar);
         render_target.draw(&self.right_pillar);
         self.exit_button.draw(render_target);
+        self.build_unit_button.draw(render_target);
+    }
+}
+
+impl <'a> CityInterface <'a> {
+    pub fn action_on(&self, mouse_position: Vector2f) -> Option<HexEvent> {
+        if self.exit_button.bounds().contains(mouse_position) {
+            Some(HexEvent { position: None, name: self.exit_button.on_click.to_owned() })
+        } else if self.build_unit_button.bounds().contains(mouse_position) {
+            Some(HexEvent { position: Some(self.city_hex_position), name: self.build_unit_button.on_click.to_owned() })
+        } else {
+            None
+        }
     }
 }
 
 pub const CITY_INTERFACE_EXIT_EVENT : &str = "city_interface_exit";
+pub const CITY_INTERFACE_BUILD_UNIT_EVENT : &str = "city_interface_build_unit";
+
+pub fn init_city_unit_construction() -> ControlFn {
+    Box::new(|mut state, _graphics| {
+        if let Some(event) = state.dispatched_events.iter().find(|e| e.name == CITY_INTERFACE_BUILD_UNIT_EVENT) {
+            if let Some(position) = event.position {
+                state.units.push(Unit {
+                    unit_type: UnitType::Pikeman,
+                    sprite: None,
+                    position,
+                });
+            }
+        }
+        state
+    })
+}
 
 pub fn init_city_interface(scale: f32) -> ControlFn {
     Box::new(move |mut state, graphics| {
-        if state.dispatched_events.contains(&CITY_INTERFACE_EXIT_EVENT.to_owned()) {
+        if let Some(_event) = state.dispatched_events.iter().find(|e| e.name == CITY_INTERFACE_EXIT_EVENT) {
             state.selected_city.take();
         }
 
         match state.selected_city {
-            Some(_selected_city) => {
+            Some(selected_city) => {
                 if state.city_interface.is_none() {
+                    let city_hex_position = Vector2i {
+                        x: selected_city.grid_position.0 as i32, y: selected_city.grid_position.1 as i32
+                    };
                     let view_size = graphics.view_size;
                     let view_center = graphics.view_center;
 
@@ -99,7 +134,19 @@ pub fn init_city_interface(scale: f32) -> ControlFn {
                         Button { panel: button_panel, text: button_text, on_click: CITY_INTERFACE_EXIT_EVENT.to_owned() }
                     };
 
-                    state.city_interface.replace(CityInterface { panel, text, right_pillar, left_pillar, exit_button });
+                    let build_unit_button = {
+                        let padding = 5. * scale;
+                        let mut button_text = Text::new(&format!("BUILD UNIT"), &graphics.font, (10. * scale) as u32);
+                        button_text.set_position(Vector2f { x: x0 + 30. * scale, y: y0 + 90. * scale });
+
+                        let mut button_panel = RectangleShape::with_size(Vector2f { x: button_text.global_bounds().width + padding * 4., y: button_text.global_bounds().height + padding * 2. });
+                        button_panel.set_position(Vector2f { x: button_text.global_bounds().left - padding * 2., y: button_text.global_bounds().top - padding });
+                        button_panel.set_fill_color(Color::rgb(60, 38, 49));
+
+                        Button { panel: button_panel, text: button_text, on_click: CITY_INTERFACE_BUILD_UNIT_EVENT.to_owned() }
+                    };
+
+                    state.city_interface.replace(CityInterface { city_hex_position, panel, text, right_pillar, left_pillar, exit_button, build_unit_button });
                 }
             },
             None => {

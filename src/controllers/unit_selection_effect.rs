@@ -1,20 +1,22 @@
 use sfml::graphics::*;
 
 use crate::ControlFn;
+use crate::entities::Unit;
 
 pub fn init_unit_selection_effect() -> ControlFn {
     Box::new(|mut state, _graphics| {
-        if let Some(_unit) = state.unit_selected {
+        if let Some(hex) = state.unit_selected {
             let mut timer = state.unit_selection_effect_timer;
             timer += state.tick_time;
 
-            let mut color = state.units_sprites[0].color();
-            let alpha = color.alpha_mut();
+            let unit = state.get_unit_on_hex_mut(&hex).unwrap();
+            let Unit { sprite, .. } = unit;
+            let sprite = sprite.as_mut().unwrap();
 
             if timer < 500. {
-                *alpha = 100;
+                sprite.set_color(Color::WHITE);
             } else if timer < 700. {
-                state.units_sprites[0].set_color(Color::TRANSPARENT);
+                sprite.set_color(Color::TRANSPARENT);
             } else {
                 timer = 0.;
             }

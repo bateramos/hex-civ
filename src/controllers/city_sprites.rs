@@ -12,9 +12,8 @@ pub fn init_city_sprites<'a>() -> ControlFn {
 
         cities.push(city);
 
-        state.cities = cities;
+        state.cities_sprites = cities;
 
         state
     })
 }
-

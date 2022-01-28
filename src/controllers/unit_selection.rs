@@ -22,7 +22,7 @@ pub fn init_unit_selection<'a>(scale: f32) -> ControlFn {
                         closest = find_with_location(center, scale, &state.hexagons);
 
                         if let Some(c) = closest {
-                            if let None = state.units[c.grid_position.1][c.grid_position.0] {
+                            if let None = state.get_unit_on_hex(&c) {
                                 closest.take();
                             }
                         }
