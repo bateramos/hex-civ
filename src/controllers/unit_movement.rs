@@ -5,9 +5,10 @@ use crate::ControlFn;
 
 pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
     Box::new(move |mut state, _graphics| {
-        if let Some(hex) = state.unit_selected {
-            let mut x = hex.grid_position.0;
-            let mut y = hex.grid_position.1;
+        if let Some(id) = state.unit_selected {
+            let unit = state.units.iter_mut().find(|u| u.id == id).unwrap();
+            let mut x = unit.position.x;
+            let mut y = unit.position.y;
 
             let mut event_triggered = false;
 
@@ -22,9 +23,9 @@ pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
                             event_triggered = true;
 
                             x = if y % 2 == 0 {
-                                hex.grid_position.0
+                                x
                             } else {
-                                hex.grid_position.0 + 1
+                                x + 1
                             };
 
                             y = y - 1;
@@ -32,9 +33,9 @@ pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
                             event_triggered = true;
 
                             x = if y % 2 == 0 {
-                                hex.grid_position.0 - 1
+                                x - 1
                             } else {
-                                hex.grid_position.0
+                                x
                             };
 
                             y = y - 1;
@@ -42,9 +43,9 @@ pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
                             event_triggered = true;
 
                             x = if y % 2 == 0 {
-                                hex.grid_position.0
+                                x
                             } else {
-                                hex.grid_position.0 + 1
+                                x + 1
                             };
 
                             y = y + 1;
@@ -56,9 +57,9 @@ pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
                             event_triggered = true;
 
                             x = if y % 2 == 0 {
-                                hex.grid_position.0 - 1
+                                x - 1
                             } else {
-                                hex.grid_position.0
+                                x
                             };
 
                             y = y + 1;
@@ -69,9 +70,7 @@ pub fn init_unit_movement(move_config: MoveKeyboardConfig) -> ControlFn {
             });
 
             if event_triggered {
-                let unit = state.get_unit_on_hex_mut(&hex).unwrap();
                 unit.position = Vector2i { x: x as i32, y: y as i32 };
-                state.unit_selected = Some(state.hexagons[y][x]);
             }
         }
         state

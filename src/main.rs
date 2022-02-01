@@ -83,14 +83,20 @@ fn main() {
         init_city_interface(scale),
         init_city_unit_construction(),
         init_unit_selection(scale),
+        init_unit_deselection_handler(),
         init_unit_sprite(scale),
         init_unit_selection_effect(),
+        init_unit_deselection_effect(),
         init_unit_movement(unit_controls),
         init_unit_placement(),
     ];
 
     let control_graphic_fns = vec![
         init_map_navigation(new_view.center()),
+    ];
+
+    let control_event_fns = vec![
+        init_unit_deselection(),
     ];
 
     let mut graphics = GraphicsContext {
@@ -101,15 +107,9 @@ fn main() {
     };
 
     let _selected_city = Some(hexagons[3][3]);
-    let selected_unit = Some(hexagons[4][4]);
 
     let mut state = State::new(hexagons, grid_size);
-    state.units.push(Unit {
-        unit_type: UnitType::Pikeman,
-        position: Vector2i { x: 4, y: 4 },
-        sprite: None,
-    });
-    state.unit_selected = selected_unit;
+    state.units.push(Unit::new(Vector2i { x: 4, y: 4 }));
     state.cities[3][3] = Some(City {});
     //state.selected_city = selected_city;
 
@@ -173,13 +173,15 @@ fn main() {
             });
         }
 
-        /*
         control_event_fns.iter().for_each(|fun| {
             if let Some(event) = (fun)(&state, &graphics) {
                 state.dispatched_events.push(event);
             }
         });
-        */
+
+        if !state.dispatched_events.is_empty() {
+            println!("{:?}", state.dispatched_events);
+        }
 
         state.tick_time = clock.elapsed_time().as_milliseconds() as f32;
 

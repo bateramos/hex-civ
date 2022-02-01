@@ -63,7 +63,7 @@ impl <'a> Drawable for CityInterface<'a> {
 impl <'a> CityInterface <'a> {
     pub fn action_on(&self, mouse_position: Vector2f) -> Option<HexEvent> {
         if self.exit_button.bounds().contains(mouse_position) {
-            Some(HexEvent { position: None, name: self.exit_button.on_click.to_owned() })
+            Some(HexEvent::new(&self.exit_button.on_click))
         } else if self.build_unit_button.bounds().contains(mouse_position) {
             Some(HexEvent { position: Some(self.city_hex_position), name: self.build_unit_button.on_click.to_owned() })
         } else {
@@ -77,13 +77,9 @@ pub const CITY_INTERFACE_BUILD_UNIT_EVENT : &str = "city_interface_build_unit";
 
 pub fn init_city_unit_construction() -> ControlFn {
     Box::new(|mut state, _graphics| {
-        if let Some(event) = state.dispatched_events.iter().find(|e| e.name == CITY_INTERFACE_BUILD_UNIT_EVENT) {
+        if let Some(event) = state.has_event_triggered(CITY_INTERFACE_BUILD_UNIT_EVENT) {
             if let Some(position) = event.position {
-                state.units.push(Unit {
-                    unit_type: UnitType::Pikeman,
-                    sprite: None,
-                    position,
-                });
+                state.units.push(Unit::new(position));
             }
         }
         state
@@ -92,7 +88,7 @@ pub fn init_city_unit_construction() -> ControlFn {
 
 pub fn init_city_interface(scale: f32) -> ControlFn {
     Box::new(move |mut state, graphics| {
-        if let Some(_event) = state.dispatched_events.iter().find(|e| e.name == CITY_INTERFACE_EXIT_EVENT) {
+        if let Some(_event) = state.has_event_triggered(CITY_INTERFACE_EXIT_EVENT) {
             state.selected_city.take();
         }
 

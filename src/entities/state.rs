@@ -18,7 +18,7 @@ pub struct State <'a> {
 
     pub units: Vec<Unit<'a>>,
     pub units_sprites: Vec<Sprite<'a>>,
-    pub unit_selected: Option<Hexagon>,
+    pub unit_selected: Option<i32>,
     pub unit_selection_effect_timer: f32,
 }
 
@@ -57,5 +57,9 @@ impl <'a> State <'a> {
         let y = hex.grid_position.1 as i32;
 
         self.units.iter_mut().find(|u| u.position.x == x && u.position.y == y)
+    }
+
+    pub fn has_event_triggered(&self, event: &str) -> Option<&HexEvent> {
+        self.dispatched_events.iter().find(|e| e.name == event)
     }
 }

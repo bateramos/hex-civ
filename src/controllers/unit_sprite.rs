@@ -12,10 +12,10 @@ pub fn init_unit_sprite(scale: f32) -> ControlFn {
                 unit.sprite = Some(new_sprite);
             };
 
-            let Unit { sprite, .. } = unit;
+            let Unit { sprite, position, .. } = unit;
 
             if let Some(sprite) = sprite {
-                sprite.set_position(state.hexagons[unit.position.y as usize][unit.position.x as usize].sprite_position);
+                sprite.set_position(state.hexagons[position.y as usize][position.x as usize].sprite_position);
                 sprite.move_(Vector2f { y: 0., x: 6. * scale });
             }
         });
