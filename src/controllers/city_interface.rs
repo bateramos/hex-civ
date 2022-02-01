@@ -1,6 +1,7 @@
 use sfml::{graphics::*, system::*};
 
-use crate::entities::{HexEvent, UnitType, Unit};
+use crate::utils::find_with_location;
+use crate::entities::{HexEvent, Unit};
 use crate::ControlFn;
 
 pub trait Drawable {
@@ -89,14 +90,17 @@ pub fn init_city_unit_construction() -> ControlFn {
 pub fn init_city_interface(scale: f32) -> ControlFn {
     Box::new(move |mut state, graphics| {
         if let Some(_event) = state.has_event_triggered(CITY_INTERFACE_EXIT_EVENT) {
-            state.selected_city.take();
+            state.city_selected.take();
         }
 
-        match state.selected_city {
-            Some(selected_city) => {
+        match state.city_selected {
+            Some(_) => {
                 if state.city_interface.is_none() {
+                    let center = graphics.view_center;
+                    let hex = find_with_location(center, scale, &state.hexagons).unwrap();
+
                     let city_hex_position = Vector2i {
-                        x: selected_city.grid_position.0 as i32, y: selected_city.grid_position.1 as i32
+                        x: hex.grid_position.0 as i32, y: hex.grid_position.1 as i32
                     };
                     let view_size = graphics.view_size;
                     let view_center = graphics.view_center;

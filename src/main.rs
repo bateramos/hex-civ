@@ -110,7 +110,7 @@ fn main() {
 
     let mut state = State::new(hexagons, grid_size);
     state.units.push(Unit::new(Vector2i { x: 4, y: 4 }));
-    state.cities[3][3] = Some(City {});
+    state.cities.push(City::new(Vector2i { x: 3, y: 3 }));
     //state.selected_city = selected_city;
 
     let mut clock = Clock::start();
@@ -140,7 +140,7 @@ fn main() {
 
         sprites.iter().for_each(|sprite: &Sprite| window.draw(sprite));
         background_grid.iter().for_each(|shape| window.draw(shape));
-        state.cities_sprites.iter().for_each(|shape| window.draw(shape));
+        state.cities.iter().for_each(|city| window.draw(city.sprite.as_ref().unwrap()));
         state.units.iter().for_each(|unit| window.draw(unit.sprite.as_ref().unwrap()));
 
         /*

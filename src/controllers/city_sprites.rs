@@ -4,15 +4,15 @@ use crate::ControlFn;
 
 pub fn init_city_sprites<'a>() -> ControlFn {
     Box::new(|mut state, graphics| {
-        let mut cities = Vec::new();
+        state.cities.iter_mut().for_each(|city| {
+            if let None = city.sprite {
+                let mut new_sprite = graphics.textures.city.clone();
+                let hex = state.hexagons[city.position.y as usize][city.position.x as usize];
+                new_sprite.set_position(hex.sprite_position);
 
-        let mut city = graphics.textures.city.clone();
-        let hexagon = state.hexagons[3][3];
-        city.set_position(hexagon.sprite_position);
-
-        cities.push(city);
-
-        state.cities_sprites = cities;
+                city.sprite = Some(new_sprite);
+            };
+        });
 
         state
     })

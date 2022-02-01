@@ -4,7 +4,7 @@ use crate::ControlGraphicsFn;
 
 pub fn init_map_navigation(center: Vector2f) -> ControlGraphicsFn {
     Box::new(move |mut view, state, _graphics| {
-        if state.selected_city.is_none() {
+        if state.city_selected.is_none() {
             state.events.iter().for_each(|event| {
                 match event {
                     Event::KeyPressed { code: Key::UP, .. } => view.move_(Vector2f { x: 0., y: -10. }),
