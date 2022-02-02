@@ -11,9 +11,7 @@ pub fn init_city_selection(scale: f32) -> ControlFn {
         state.events.iter().for_each(|event| {
             match event {
                 Event::MouseButtonPressed { button, .. } => {
-                    if mouse::Button::RIGHT == *button {
-                        selected = None
-                    } else if mouse::Button::LEFT == *button {
+                    if mouse::Button::LEFT == *button {
                         if let Some(_) = state.city_selected {
                             return
                         }

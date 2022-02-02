@@ -80,8 +80,9 @@ fn main() {
         init_key_handler(),
         init_city_selection(scale),
         init_city_sprites(),
-        init_city_interface(scale),
         init_city_unit_construction(),
+        init_city_interface_creation(scale),
+        init_city_exit_handler(),
         init_unit_selection(scale),
         init_unit_deselection_handler(),
         init_unit_sprite(scale),
@@ -96,7 +97,10 @@ fn main() {
     ];
 
     let control_event_fns = vec![
+        init_mouse_button_handler(),
         init_unit_deselection(),
+        init_city_interface(),
+        init_city_mouse_right_click(),
     ];
 
     let mut graphics = GraphicsContext {

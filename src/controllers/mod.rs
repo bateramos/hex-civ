@@ -12,8 +12,10 @@ mod unit_selection_effect;
 mod unit_movement;
 mod unit_placement;
 mod textures;
+mod inputs;
 
 pub use textures::*;
+pub use inputs::*;
 pub use map_navigation::init_map_navigation;
 pub use map_creation::init_map_creation;
 pub use key_handler::init_key_handler;
