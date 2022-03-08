@@ -5,6 +5,10 @@ use crate::utils::find_with_location;
 use crate::entities::{HexEvent, Unit};
 use crate::{ControlFn, ControlActionFn};
 
+enum Anchor {
+    TOP, BOTTOM
+}
+
 pub trait Drawable {
     fn draw(&self, render_target: &mut dyn RenderTarget);
 }
@@ -118,29 +122,25 @@ pub fn init_city_interface_creation(scale: f32) -> ControlFn {
             right_pillar.set_position(Vector2f {x: x0 - 6., y: y0});
             left_pillar.set_position(Vector2f {x: x0 + view_size.x - 40. * scale, y: y0});
 
-            let exit_button = {
+            let create_button = |event: &str, text: &str, x: f32, y: f32, anchor: Anchor| {
                 let padding = 5. * scale;
-                let mut button_text = Text::new(&format!("EXIT"), &graphics.font, (10. * scale) as u32);
-                button_text.set_position(Vector2f { x: x0 + 90. * scale, y: y0 + view_size.y - 30. * scale });
+                let y_anchor = match anchor {
+                    Anchor::TOP => 0.,
+                    Anchor::BOTTOM => view_size.y,
+                };
+
+                let mut button_text = Text::new(text, &graphics.font, (10. * scale) as u32);
+                button_text.set_position(Vector2f { x: x0 + x * scale, y: y0 + y_anchor + y * scale });
 
                 let mut button_panel = RectangleShape::with_size(Vector2f { x: button_text.global_bounds().width + padding * 4., y: button_text.global_bounds().height + padding * 2. });
                 button_panel.set_position(Vector2f { x: button_text.global_bounds().left - padding * 2., y: button_text.global_bounds().top - padding });
                 button_panel.set_fill_color(Color::rgb(60, 38, 49));
 
-                Button { panel: button_panel, text: button_text, on_click: CITY_INTERFACE_EXIT_EVENT.to_owned() }
+                Button { panel: button_panel, text: button_text, on_click: event.to_owned() }
             };
 
-            let build_unit_button = {
-                let padding = 5. * scale;
-                let mut button_text = Text::new(&format!("BUILD UNIT"), &graphics.font, (10. * scale) as u32);
-                button_text.set_position(Vector2f { x: x0 + 30. * scale, y: y0 + 90. * scale });
-
-                let mut button_panel = RectangleShape::with_size(Vector2f { x: button_text.global_bounds().width + padding * 4., y: button_text.global_bounds().height + padding * 2. });
-                button_panel.set_position(Vector2f { x: button_text.global_bounds().left - padding * 2., y: button_text.global_bounds().top - padding });
-                button_panel.set_fill_color(Color::rgb(60, 38, 49));
-
-                Button { panel: button_panel, text: button_text, on_click: CITY_INTERFACE_BUILD_UNIT_EVENT.to_owned() }
-            };
+            let exit_button = create_button(CITY_INTERFACE_EXIT_EVENT, "EXIT", 90., -30., Anchor::BOTTOM);
+            let build_unit_button = create_button(CITY_INTERFACE_BUILD_UNIT_EVENT, "BUILD UNIT", 30., 90., Anchor::TOP);
 
             state.city_interface.replace(CityInterface { city_hex_position, panel, text, right_pillar, left_pillar, exit_button, build_unit_button });
         }

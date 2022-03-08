@@ -48,7 +48,8 @@ fn move_configs() -> Vec<MoveKeyboardConfig> {
 fn main() {
     let res_index = &std::env::args().collect::<Vec<String>>()[1];
     let resolution : Resolution = resolutions()[res_index.parse::<usize>().unwrap_or(0)];
-    let unit_controls : MoveKeyboardConfig = move_configs().remove(1);
+    let unit_control_index = &std::env::args().collect::<Vec<String>>()[2];
+    let unit_controls : MoveKeyboardConfig = move_configs().remove(unit_control_index.parse::<usize>().unwrap_or(0));
     let scale = resolution.2;
     let grid_size = (30, 20);
     let seed = rand::random::<u64>() % 10000;
@@ -110,12 +111,12 @@ fn main() {
         view_size: new_view.size(),
     };
 
-    let _selected_city = Some(hexagons[3][3]);
+    let selected_city = hexagons[3][3];
 
     let mut state = State::new(hexagons, grid_size);
     state.units.push(Unit::new(Vector2i { x: 4, y: 4 }));
     state.cities.push(City::new(Vector2i { x: 3, y: 3 }));
-    //state.selected_city = selected_city;
+    state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
 
     let mut clock = Clock::start();
 
