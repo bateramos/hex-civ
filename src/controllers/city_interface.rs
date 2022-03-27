@@ -2,7 +2,7 @@ use sfml::{graphics::*, system::*};
 
 use crate::controllers::MOUSE_CLICK_RIGHT;
 use crate::utils::find_with_location;
-use crate::entities::{HexEvent, Unit};
+use crate::entities::{HexEvent, Unit, UnitType};
 use crate::{ControlFn, ControlActionFn};
 
 enum Anchor {
@@ -52,7 +52,7 @@ pub struct CityInterface <'a> {
     right_pillar: Sprite<'a>,
     city_hex_position: Vector2i,
     pub exit_button: Button<'a>,
-    pub build_unit_button: Button<'a>,
+    pub build_unit_buttons: Vec<Button<'a>>,
 }
 
 impl <'a> Drawable for CityInterface<'a> {
@@ -62,16 +62,16 @@ impl <'a> Drawable for CityInterface<'a> {
         render_target.draw(&self.left_pillar);
         render_target.draw(&self.right_pillar);
         self.exit_button.draw(render_target);
-        self.build_unit_button.draw(render_target);
+        self.build_unit_buttons.iter().for_each(|button| button.draw(render_target));
     }
 }
 
 impl <'a> CityInterface <'a> {
     pub fn action_on(&self, mouse_position: Vector2f) -> Option<HexEvent> {
-        if self.exit_button.bounds().contains(mouse_position) {
+        if let Some(button) = self.build_unit_buttons.iter().find(|button| button.bounds().contains(mouse_position)) {
+            Some(HexEvent { position: Some(self.city_hex_position), name: button.on_click.to_owned() })
+        } else if self.exit_button.bounds().contains(mouse_position) {
             Some(HexEvent::new(&self.exit_button.on_click))
-        } else if self.build_unit_button.bounds().contains(mouse_position) {
-            Some(HexEvent { position: Some(self.city_hex_position), name: self.build_unit_button.on_click.to_owned() })
         } else {
             None
         }
@@ -81,12 +81,17 @@ impl <'a> CityInterface <'a> {
 pub const CITY_INTERFACE_INIT_EVENT : &str = "CITY_INTERFACE_INIT_EVENT";
 pub const CITY_INTERFACE_EXIT_EVENT : &str = "city_interface_exit";
 pub const CITY_INTERFACE_BUILD_UNIT_EVENT : &str = "city_interface_build_unit";
+pub const CITY_INTERFACE_BUILD_SETTLER_EVENT : &str = "city_interface_build_settler_event";
 
 pub fn init_city_unit_construction() -> ControlFn {
     Box::new(|mut state, _graphics| {
         if let Some(event) = state.has_event_triggered(CITY_INTERFACE_BUILD_UNIT_EVENT) {
             if let Some(position) = event.position {
                 state.units.push(Unit::new(position));
+            }
+        } else if let Some(event) = state.has_event_triggered(CITY_INTERFACE_BUILD_SETTLER_EVENT) {
+            if let Some(position) = event.position {
+                state.units.push(Unit::new_with_type(position, UnitType::Settler));
             }
         }
         state
@@ -108,20 +113,6 @@ pub fn init_city_interface_creation(scale: f32) -> ControlFn {
             let x0 = view_center.x - view_size.x / 2.;
             let y0 = view_center.y - view_size.y / 2.;
 
-            let mut panel = RectangleShape::with_size(Vector2f { x: view_size.x, y: 34. * scale });
-            panel.set_position(Vector2f { x: x0, y: y0 + 2. * scale });
-            panel.set_fill_color(Color::rgba(100, 16, 58, 91));
-
-            let mut text = Text::new(&format!("SUPER COOL CITY"), &graphics.font, (10. * scale) as u32);
-            text.set_position(Vector2f { x: x0 + (view_size.x / 2.) - (text.global_bounds().width / 2.), y: y0 + 16. * scale });
-
-            let pillar_sprite = graphics.textures.pillar.clone();
-
-            let mut right_pillar = pillar_sprite.clone();
-            let mut left_pillar = pillar_sprite.clone();
-            right_pillar.set_position(Vector2f {x: x0 - 6., y: y0});
-            left_pillar.set_position(Vector2f {x: x0 + view_size.x - 40. * scale, y: y0});
-
             let create_button = |event: &str, text: &str, x: f32, y: f32, anchor: Anchor| {
                 let padding = 5. * scale;
                 let y_anchor = match anchor {
@@ -139,10 +130,30 @@ pub fn init_city_interface_creation(scale: f32) -> ControlFn {
                 Button { panel: button_panel, text: button_text, on_click: event.to_owned() }
             };
 
+            let mut panel = RectangleShape::with_size(Vector2f { x: view_size.x, y: 34. * scale });
+            panel.set_position(Vector2f { x: x0, y: y0 + 2. * scale });
+            panel.set_fill_color(Color::rgba(100, 16, 58, 91));
+
+            let mut text = Text::new(&format!("SUPER COOL CITY"), &graphics.font, (10. * scale) as u32);
+            text.set_position(Vector2f { x: x0 + (view_size.x / 2.) - (text.global_bounds().width / 2.), y: y0 + 16. * scale });
+
+            let pillar_sprite = graphics.textures.pillar.clone();
+
+            let mut right_pillar = pillar_sprite.clone();
+            let mut left_pillar = pillar_sprite.clone();
+            right_pillar.set_position(Vector2f {x: x0 - 6., y: y0});
+            left_pillar.set_position(Vector2f {x: x0 + view_size.x - 40. * scale, y: y0});
+
             let exit_button = create_button(CITY_INTERFACE_EXIT_EVENT, "EXIT", 90., -30., Anchor::BOTTOM);
             let build_unit_button = create_button(CITY_INTERFACE_BUILD_UNIT_EVENT, "BUILD UNIT", 30., 90., Anchor::TOP);
+            let build_settler_button = create_button(CITY_INTERFACE_BUILD_SETTLER_EVENT, "BUILD SETTLER", 30., 120., Anchor::TOP);
 
-            state.city_interface.replace(CityInterface { city_hex_position, panel, text, right_pillar, left_pillar, exit_button, build_unit_button });
+            let build_unit_buttons = vec![
+                build_unit_button,
+                build_settler_button,
+            ];
+
+            state.city_interface.replace(CityInterface { city_hex_position, panel, text, right_pillar, left_pillar, exit_button, build_unit_buttons });
         }
         state
     })

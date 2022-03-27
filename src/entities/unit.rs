@@ -5,7 +5,7 @@ use rand;
 
 #[derive(Clone, Copy, Debug)]
 pub enum UnitType {
-    Pikeman,
+    Pikeman, Settler
 }
 
 #[derive(Clone, Debug)]
@@ -24,5 +24,11 @@ impl <'a> Unit <'a> {
             position,
             sprite: None,
         }
+    }
+    pub fn new_with_type(position: Vector2i, unit_type: UnitType) -> Unit<'a> {
+        let mut unit = Unit::new(position);
+        unit.unit_type = unit_type;
+
+        unit
     }
 }
