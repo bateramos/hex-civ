@@ -3,7 +3,7 @@ use sfml::graphics::Sprite;
 
 use rand;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum UnitType {
     Pikeman, Settler
 }

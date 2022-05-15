@@ -23,7 +23,7 @@ pub struct State <'a> {
 }
 
 impl <'a> State <'a> {
-    pub fn new(hexagons: HexagonColumn, grid_size: (i32, i32)) -> State<'static> {
+    pub fn new(hexagons: HexagonColumn, _grid_size: (i32, i32)) -> State<'static> {
         State {
             tick_time: 0.0,
 

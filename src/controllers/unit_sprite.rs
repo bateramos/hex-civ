@@ -2,13 +2,16 @@ use sfml::graphics::*;
 use sfml::system::*;
 
 use crate::ControlFn;
-use crate::entities::Unit;
+use crate::entities::{Unit, UnitType};
 
 pub fn init_unit_sprite(scale: f32) -> ControlFn {
     Box::new(move |mut state, graphics| {
         state.units.iter_mut().for_each(|unit| {
             if let None = unit.sprite {
-                let new_sprite = graphics.textures.pikeman.clone();
+                let new_sprite = match unit.unit_type {
+                    UnitType::Pikeman => graphics.textures.pikeman.clone(),
+                    UnitType::Settler => graphics.textures.peasant.clone()
+                };
                 unit.sprite = Some(new_sprite);
             };
 

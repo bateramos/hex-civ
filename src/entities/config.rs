@@ -8,3 +8,7 @@ pub struct MoveKeyboardConfig {
     pub bottom: Key,
     pub bottom_right: Key,
 }
+
+pub struct OrderKeyboardConfig {
+    pub build_city: Key,
+}

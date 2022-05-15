@@ -11,6 +11,7 @@ mod unit_deselection;
 mod unit_selection_effect;
 mod unit_movement;
 mod unit_placement;
+mod unit_order;
 mod textures;
 mod inputs;
 
@@ -29,3 +30,4 @@ pub use unit_deselection::*;
 pub use unit_selection_effect::*;
 pub use unit_movement::init_unit_movement;
 pub use unit_placement::init_unit_placement;
+pub use unit_order::init_unit_order;

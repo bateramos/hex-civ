@@ -14,6 +14,7 @@ pub struct LoadedTextures <'a> {
     pub snow_with_tress: Sprite<'a>,
 
     pub pikeman: Sprite<'a>,
+    pub peasant: Sprite<'a>,
 }
 
 pub const SPRITE_X_PADDING : i32 = 32;
@@ -26,7 +27,7 @@ fn load_texture<'a>(texture: &'a Texture, x: i32, y: i32, scale_x: f32, scale_y:
     sprite
 }
 
-pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a Texture, texture_pikeman: &'a Texture) -> LoadedTextures<'a> {
+pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a Texture, texture_pikeman: &'a Texture, texture_peasant: &'a Texture) -> LoadedTextures<'a> {
     let mut pillar = Sprite::with_texture_and_rect(&texture_pillar, &IntRect::new(0, 0, 50, 160));
     pillar.set_scale(Vector2f {x: scale, y: 1.9 * scale});
 
@@ -49,6 +50,9 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let mut pikeman = Sprite::with_texture_and_rect(&texture_pikeman, &IntRect::new(0, 0, 48, 88));
     pikeman.set_scale(Vector2f {x: 0.4 * scale, y: 0.4 * scale});
 
+    let mut peasant = Sprite::with_texture_and_rect(&texture_peasant, &IntRect::new(0, 0, 48, 70));
+    peasant.set_scale(Vector2f {x: 0.4 * scale, y: 0.4 * scale});
+
     LoadedTextures {
         pillar,
 
@@ -63,5 +67,6 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
         snow_with_tress,
 
         pikeman,
+        peasant,
     }
 }

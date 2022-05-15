@@ -50,6 +50,7 @@ fn main() {
     let resolution : Resolution = resolutions()[res_index.parse::<usize>().unwrap_or(0)];
     let unit_control_index = &std::env::args().collect::<Vec<String>>()[2];
     let unit_controls : MoveKeyboardConfig = move_configs().remove(unit_control_index.parse::<usize>().unwrap_or(0));
+    let order_controls : OrderKeyboardConfig = OrderKeyboardConfig { build_city: Key::B };
     let scale = resolution.2;
     let grid_size = (30, 20);
     let seed = rand::random::<u64>() % 10000;
@@ -72,8 +73,9 @@ fn main() {
     let texture = Texture::from_file("res/textures/main.png").unwrap();
     let texture_pillar = Texture::from_file("res/textures/pillar.png").unwrap();
     let texture_pikeman = Texture::from_file("res/textures/pikeman.png").unwrap();
+    let texture_peasant = Texture::from_file("res/textures/peasant.png").unwrap();
 
-    let textures = init_textures(scale, &texture, &texture_pillar, &texture_pikeman);
+    let textures = init_textures(scale, &texture, &texture_pillar, &texture_pikeman, &texture_peasant);
 
     let (hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
 
@@ -100,6 +102,7 @@ fn main() {
     let control_event_fns = vec![
         init_mouse_button_handler(),
         init_unit_deselection(),
+        init_unit_order(order_controls),
         init_city_interface(),
         init_city_mouse_right_click(),
     ];
@@ -114,9 +117,9 @@ fn main() {
     let selected_city = hexagons[3][3];
 
     let mut state = State::new(hexagons, grid_size);
-    state.units.push(Unit::new(Vector2i { x: 4, y: 4 }));
+    state.units.push(Unit::new_with_type(Vector2i { x: 4, y: 4 }, UnitType::Settler));
     state.cities.push(City::new(Vector2i { x: 3, y: 3 }));
-    state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
+    //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
 
     let mut clock = Clock::start();
 

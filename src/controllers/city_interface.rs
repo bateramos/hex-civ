@@ -69,7 +69,7 @@ impl <'a> Drawable for CityInterface<'a> {
 impl <'a> CityInterface <'a> {
     pub fn action_on(&self, mouse_position: Vector2f) -> Option<HexEvent> {
         if let Some(button) = self.build_unit_buttons.iter().find(|button| button.bounds().contains(mouse_position)) {
-            Some(HexEvent { position: Some(self.city_hex_position), name: button.on_click.to_owned() })
+            Some(HexEvent::new_from_position(&button.on_click.to_owned(), self.city_hex_position))
         } else if self.exit_button.bounds().contains(mouse_position) {
             Some(HexEvent::new(&self.exit_button.on_click))
         } else {
@@ -87,7 +87,7 @@ pub fn init_city_unit_construction() -> ControlFn {
     Box::new(|mut state, _graphics| {
         if let Some(event) = state.has_event_triggered(CITY_INTERFACE_BUILD_UNIT_EVENT) {
             if let Some(position) = event.position {
-                state.units.push(Unit::new(position));
+                state.units.push(Unit::new_with_type(position, UnitType::Pikeman));
             }
         } else if let Some(event) = state.has_event_triggered(CITY_INTERFACE_BUILD_SETTLER_EVENT) {
             if let Some(position) = event.position {
