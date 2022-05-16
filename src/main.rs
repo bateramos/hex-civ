@@ -19,6 +19,12 @@ pub struct GraphicsContext <'a> {
     pub view_size: Vector2f,
 }
 
+pub struct EventFn <'a> {
+    pub func: Box<dyn Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>,
+    pub event: &'static str,
+}
+
+type ControlEventFn <'a> = EventFn<'a>;
 type ControlFn = Box<dyn for<'a> Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>;
 type ControlActionFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> Option<HexEvent>>;
 type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>) -> SfBox<View>>;
@@ -107,6 +113,10 @@ fn main() {
         init_city_mouse_right_click(),
     ];
 
+    let control_hex_event_functions = vec![
+        init_city_build_event(),
+    ];
+
     let mut graphics = GraphicsContext {
         textures: &textures,
         font: &font,
@@ -189,6 +199,13 @@ fn main() {
 
         if !state.dispatched_events.is_empty() {
             println!("{:?}", state.dispatched_events);
+            state = control_hex_event_functions.iter().fold(state, |state, controller| {
+                if let Some(_event) = state.has_event_triggered(controller.event) {
+                    (controller.func)(state, &graphics)
+                } else {
+                    state
+                }
+            });
         }
 
         state.tick_time = clock.elapsed_time().as_milliseconds() as f32;
