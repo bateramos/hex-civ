@@ -27,6 +27,7 @@ pub struct EventFn <'a> {
 type ControlEventFn <'a> = EventFn<'a>;
 type ControlFn = Box<dyn for<'a> Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>;
 type ControlActionFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> Option<HexEvent>>;
+type ControlActionsFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> Option<Vec<HexEvent>>>;
 type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>) -> SfBox<View>>;
 
 type Resolution = (u32, u32, f32);
@@ -90,10 +91,7 @@ fn main() {
         init_city_selection(scale),
         init_city_sprites(),
         init_city_unit_construction(),
-        init_city_interface_creation(scale),
-        init_city_exit_handler(),
         init_unit_selection(scale),
-        init_unit_deselection_handler(),
         init_unit_sprite(scale),
         init_unit_selection_effect(),
         init_unit_deselection_effect(),
@@ -108,13 +106,19 @@ fn main() {
     let control_event_fns = vec![
         init_mouse_button_handler(),
         init_unit_deselection(),
-        init_unit_order(order_controls),
         init_city_interface(),
         init_city_mouse_right_click(),
     ];
 
+    let control_events_fns = vec![
+        init_unit_order(order_controls),
+    ];
+
     let control_hex_event_functions = vec![
+        init_unit_deselection_handler(),
         init_city_build_event(),
+        init_city_interface_creation(scale),
+        init_city_exit_handler(),
     ];
 
     let mut graphics = GraphicsContext {
@@ -194,6 +198,12 @@ fn main() {
         control_event_fns.iter().for_each(|fun| {
             if let Some(event) = (fun)(&state, &graphics) {
                 state.dispatched_events.push(event);
+            }
+        });
+
+        control_events_fns.iter().for_each(|fun| {
+            if let Some(events) = (fun)(&state, &graphics) {
+                state.dispatched_events.extend(events);
             }
         });
 

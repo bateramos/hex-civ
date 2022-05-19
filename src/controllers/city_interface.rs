@@ -3,7 +3,7 @@ use sfml::{graphics::*, system::*};
 use crate::controllers::MOUSE_CLICK_RIGHT;
 use crate::utils::find_with_location;
 use crate::entities::{HexEvent, Unit, UnitType};
-use crate::{ControlFn, ControlActionFn};
+use crate::{ControlFn, ControlActionFn, ControlEventFn};
 
 enum Anchor {
     TOP, BOTTOM
@@ -79,9 +79,9 @@ impl <'a> CityInterface <'a> {
 }
 
 pub const CITY_INTERFACE_INIT_EVENT : &str = "CITY_INTERFACE_INIT_EVENT";
-pub const CITY_INTERFACE_EXIT_EVENT : &str = "city_interface_exit";
-pub const CITY_INTERFACE_BUILD_UNIT_EVENT : &str = "city_interface_build_unit";
-pub const CITY_INTERFACE_BUILD_SETTLER_EVENT : &str = "city_interface_build_settler_event";
+pub const CITY_INTERFACE_EXIT_EVENT : &str = "CITY_INTERFACE_EXIT";
+pub const CITY_INTERFACE_BUILD_UNIT_EVENT : &str = "CITY_INTERFACE_BUILD_UNIT";
+pub const CITY_INTERFACE_BUILD_SETTLER_EVENT : &str = "CITY_INTERFACE_BUILD_SETTLER_EVENT";
 
 pub fn init_city_unit_construction() -> ControlFn {
     Box::new(|mut state, _graphics| {
@@ -98,9 +98,10 @@ pub fn init_city_unit_construction() -> ControlFn {
     })
 }
 
-pub fn init_city_interface_creation(scale: f32) -> ControlFn {
-    Box::new(move |mut state, graphics| {
-        if let Some(_) = state.has_event_triggered(CITY_INTERFACE_INIT_EVENT) {
+pub fn init_city_interface_creation<'a>(scale: f32) -> ControlEventFn<'a> {
+    ControlEventFn {
+        event: CITY_INTERFACE_INIT_EVENT,
+        func: Box::new(move |mut state, graphics, _event| {
             let center = graphics.view_center;
             let hex = find_with_location(center, scale, &state.hexagons).unwrap();
 
@@ -154,19 +155,21 @@ pub fn init_city_interface_creation(scale: f32) -> ControlFn {
             ];
 
             state.city_interface.replace(CityInterface { city_hex_position, panel, text, right_pillar, left_pillar, exit_button, build_unit_buttons });
-        }
-        state
-    })
+
+            state
+        })
+    }
 }
 
-pub fn init_city_exit_handler() -> ControlFn {
-    Box::new(|mut state, _graphics| {
-        if let Some(_event) = state.has_event_triggered(CITY_INTERFACE_EXIT_EVENT) {
+pub fn init_city_exit_handler<'a>() -> ControlEventFn<'a> {
+    ControlEventFn { 
+        event: CITY_INTERFACE_EXIT_EVENT,
+        func: Box::new(|mut state, _graphics, _event| {
             state.city_selected.take();
             state.city_interface.take();
-        }
-        state
-    })
+            state
+        })
+    }
 }
 
 pub fn init_city_mouse_right_click() -> ControlActionFn {
