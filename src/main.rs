@@ -20,7 +20,7 @@ pub struct GraphicsContext <'a> {
 }
 
 pub struct EventFn <'a> {
-    pub func: Box<dyn Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>,
+    pub func: Box<dyn Fn(State<'a>, &GraphicsContext<'a>, HexEvent) -> State<'a>>,
     pub event: &'static str,
 }
 
@@ -200,8 +200,9 @@ fn main() {
         if !state.dispatched_events.is_empty() {
             println!("{:?}", state.dispatched_events);
             state = control_hex_event_functions.iter().fold(state, |state, controller| {
-                if let Some(_event) = state.has_event_triggered(controller.event) {
-                    (controller.func)(state, &graphics)
+                if let Some(event) = state.has_event_triggered(controller.event) {
+                    let event = event.clone();
+                    (controller.func)(state, &graphics, event)
                 } else {
                     state
                 }

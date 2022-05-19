@@ -2,7 +2,7 @@ use sfml::system::*;
 
 use crate::Unit;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HexEvent {
     pub position: Option<Vector2i>,
     pub name: String,
