@@ -19,12 +19,18 @@ pub struct GraphicsContext <'a> {
     pub view_size: Vector2f,
 }
 
-pub struct EventFn <'a> {
+pub struct EventStateFn <'a> {
     pub func: Box<dyn Fn(State<'a>, &GraphicsContext<'a>, HexEvent) -> State<'a>>,
     pub event: &'static str,
 }
 
-type ControlEventFn <'a> = EventFn<'a>;
+pub struct EventGraphicFn <'a> {
+    pub func: Box<dyn Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>, HexEvent) -> SfBox<View>>,
+    pub event: &'static str,
+}
+
+type ControlEventFn <'a> = EventStateFn<'a>;
+type ControlEventGraphicFn <'a> = EventGraphicFn<'a>;
 type ControlFn = Box<dyn for<'a> Fn(State<'a>, &GraphicsContext<'a>) -> State<'a>>;
 type ControlActionFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> Option<HexEvent>>;
 type ControlActionsFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> Option<Vec<HexEvent>>>;
@@ -73,7 +79,7 @@ fn main() {
 
     window.set_vertical_sync_enabled(true);
     window.set_position(Vector2i { x: 200, y: 200 });
-    let mut new_view = View::from_rect(&FloatRect::new(0., 0., resolution.0 as f32, resolution.1 as f32));
+    let mut new_view = View::from_rect(&FloatRect::new(-80., -80., resolution.0 as f32, resolution.1 as f32));
     window.set_view(&new_view);
 
     let font = Font::from_file("res/fonts/Seagram tfb.ttf").unwrap();
@@ -84,7 +90,7 @@ fn main() {
 
     let textures = init_textures(scale, &texture, &texture_pillar, &texture_pikeman, &texture_peasant);
 
-    let (hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures);
+    let (hexagons, sprites, background_grid) = init_map_creation(scale, seed, &textures, &grid_size);
 
     let control_fns = vec![
         init_key_handler(),
@@ -95,7 +101,6 @@ fn main() {
         init_unit_sprite(scale),
         init_unit_selection_effect(),
         init_unit_deselection_effect(),
-        init_unit_movement(unit_controls),
         init_unit_placement(),
     ];
 
@@ -108,6 +113,7 @@ fn main() {
         init_unit_deselection(),
         init_city_interface(),
         init_city_mouse_right_click(),
+        init_unit_movement_event(unit_controls),
     ];
 
     let control_events_fns = vec![
@@ -119,6 +125,11 @@ fn main() {
         init_city_build_event(),
         init_city_interface_creation(scale),
         init_city_exit_handler(),
+        init_unit_movement(),
+    ];
+
+    let control_hex_event_graphic_functions = vec![
+        init_map_unit_follow(scale),
     ];
 
     let mut graphics = GraphicsContext {
@@ -128,12 +139,13 @@ fn main() {
         view_size: new_view.size(),
     };
 
-    let selected_city = hexagons[3][3];
+    //let selected_city = hexagons[3][3];
 
     let mut state = State::new(hexagons, grid_size);
-    state.units.push(Unit::new_with_type(Vector2i { x: 4, y: 4 }, UnitType::Settler));
-    state.cities.push(City::new(Vector2i { x: 3, y: 3 }));
+    state.units.push(Unit::new_with_type(Vector2i { x: 5, y: 5 }, UnitType::Settler));
+    state.cities.push(City::new(Vector2i { x: 2, y: 10 }));
     //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
+    state.unit_selected = Some(state.units[0].id);
 
     let mut clock = Clock::start();
 
@@ -173,8 +185,7 @@ fn main() {
                 text.set_position(hex.center);
                 window.draw(&text);
             });
-        });
-        */
+        });*/
 
         state.dispatched_events.clear();
 
@@ -215,6 +226,14 @@ fn main() {
                     (controller.func)(state, &graphics, event)
                 } else {
                     state
+                }
+            });
+            new_view = control_hex_event_graphic_functions.iter().fold(new_view, |new_view, controller| {
+                if let Some(event) = state.has_event_triggered(controller.event) {
+                    let event = event.clone();
+                    (controller.func)(new_view, &state, &graphics, event)
+                } else {
+                    new_view
                 }
             });
         }

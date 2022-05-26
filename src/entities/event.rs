@@ -19,6 +19,10 @@ impl HexEvent {
     }
 
     pub fn new_from_unit(name: &str, unit: &Unit) -> HexEvent {
-        HexEvent { position: Some(unit.position), name: name.to_owned(), unit_id: Some(unit.id) }
+        HexEvent::new_from_unit_position(name, unit, unit.position)
+    }
+
+    pub fn new_from_unit_position(name: &str, unit: &Unit, position: Vector2i) -> HexEvent {
+        HexEvent { position: Some(position), name: name.to_owned(), unit_id: Some(unit.id) }
     }
 }

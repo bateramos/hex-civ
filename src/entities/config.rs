@@ -1,5 +1,6 @@
 use sfml::window::Key;
 
+#[derive(Clone, Copy)]
 pub struct MoveKeyboardConfig {
     pub top_left: Key,
     pub top: Key,
