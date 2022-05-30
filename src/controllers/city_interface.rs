@@ -103,7 +103,7 @@ pub fn init_city_interface_creation<'a>(scale: f32) -> ControlEventFn<'a> {
         event: CITY_INTERFACE_INIT_EVENT,
         func: Box::new(move |mut state, graphics, _event| {
             let center = graphics.view_center;
-            let hex = find_with_location(center, scale, &state.hexagons).unwrap();
+            let hex = find_with_location(center, &state.hexagons).unwrap();
 
             let city_hex_position = Vector2i {
                 x: hex.grid_position.0 as i32, y: hex.grid_position.1 as i32

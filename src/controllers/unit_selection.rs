@@ -3,7 +3,7 @@ use sfml::window::*;
 use crate::utils::find_with_location;
 use crate::ControlFn;
 
-pub fn init_unit_selection<'a>(scale: f32) -> ControlFn {
+pub fn init_unit_selection<'a>() -> ControlFn {
     Box::new(move |mut state, graphics| {
         let mut selected : Option<i32> = state.unit_selected;
         let center = graphics.view_center;
@@ -16,7 +16,7 @@ pub fn init_unit_selection<'a>(scale: f32) -> ControlFn {
                             return
                         }
 
-                        let closest = find_with_location(center, scale, &state.hexagons);
+                        let closest = find_with_location(center, &state.hexagons);
 
                         if let Some(c) = closest {
                             if let Some(unit) = state.get_unit_on_hex(&c) {

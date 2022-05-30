@@ -79,7 +79,7 @@ fn main() {
 
     window.set_vertical_sync_enabled(true);
     window.set_position(Vector2i { x: 200, y: 200 });
-    let mut new_view = View::from_rect(&FloatRect::new(-80., -80., resolution.0 as f32, resolution.1 as f32));
+    let mut new_view = View::from_rect(&FloatRect::new(0.,0., resolution.0 as f32, resolution.1 as f32));
     window.set_view(&new_view);
 
     let font = Font::from_file("res/fonts/Seagram tfb.ttf").unwrap();
@@ -94,10 +94,10 @@ fn main() {
 
     let control_fns = vec![
         init_key_handler(),
-        init_city_selection(scale),
+        init_city_selection(),
         init_city_sprites(),
         init_city_unit_construction(),
-        init_unit_selection(scale),
+        init_unit_selection(),
         init_unit_sprite(scale),
         init_unit_selection_effect(),
         init_unit_deselection_effect(),

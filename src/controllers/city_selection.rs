@@ -3,7 +3,7 @@ use sfml::window::*;
 use crate::utils::find_with_location;
 use crate::ControlFn;
 
-pub fn init_city_selection(scale: f32) -> ControlFn {
+pub fn init_city_selection() -> ControlFn {
     Box::new(move |mut state, graphics| {
         let mut selected : Option<i32> = state.city_selected;
         let center = graphics.view_center;
@@ -16,7 +16,7 @@ pub fn init_city_selection(scale: f32) -> ControlFn {
                             return
                         }
 
-                        let hex = find_with_location(center, scale, &state.hexagons);
+                        let hex = find_with_location(center, &state.hexagons);
 
                         if let Some(c) = hex {
                             if let Some(city) = state.get_city_on_hex(&c) {
