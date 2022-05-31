@@ -125,7 +125,7 @@ fn main() {
         init_city_build_event(),
         init_city_interface_creation(scale),
         init_city_exit_handler(),
-        init_unit_movement(),
+        init_unit_movement(grid_size.clone()),
     ];
 
     let control_hex_event_graphic_functions = vec![
