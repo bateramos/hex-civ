@@ -10,7 +10,7 @@ pub fn init_city_build_event<'a>() -> ControlEventFn<'a> {
             state.units.retain(|u| u.id != unit_id);
             state.cities.push(City::new(position));
             let mut hex = state.get_hex_with_position_mut(position.x, position.y);
-            hex.category = HexagonCategory::CITY;
+            hex.category = HexagonCategory::City;
 
             state
         }),

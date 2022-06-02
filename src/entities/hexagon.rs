@@ -5,10 +5,15 @@ pub type HexagonColumn = Vec<HexagonLine>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HexagonCategory {
-    FIELD,
-    CITY,
-    ICE,
-    MOUNTAIN,
+    Field,
+    City,
+    Snow,
+    SnowWithTrees,
+    Mountain,
+    DenseForest,
+    Hill,
+    HillWithTrees,
+    Forest,
 }
 
 #[derive(Clone, Copy, Debug)]
