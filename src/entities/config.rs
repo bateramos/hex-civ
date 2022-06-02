@@ -12,4 +12,5 @@ pub struct MoveKeyboardConfig {
 
 pub struct OrderKeyboardConfig {
     pub build_city: Key,
+    pub build_farm_field: Key,
 }

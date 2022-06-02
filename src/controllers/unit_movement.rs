@@ -1,6 +1,6 @@
-use crate::{ControlEventFn, UNIT_MOVEMENT_EVENT};
+use crate::{ControlEventFn, GridSize, UNIT_MOVEMENT_EVENT};
 
-pub fn init_unit_movement<'a>(grid_size: (usize, usize)) -> ControlEventFn<'a> {
+pub fn init_unit_movement<'a>(grid_size: GridSize) -> ControlEventFn<'a> {
     ControlEventFn {
         event: UNIT_MOVEMENT_EVENT,
         func: Box::new(move |mut state, _graphics, event| {

@@ -1,6 +1,7 @@
 use sfml::graphics::Sprite;
 use sfml::window::Event;
 
+use crate::GridSize;
 use crate::entities::*;
 use crate::controllers::*;
 
@@ -9,6 +10,7 @@ pub struct State <'a> {
 
     pub city_interface: Option<CityInterface<'a>>,
     pub hexagons: HexagonColumn,
+    pub hex_improvements: Vec<HexImprovement<'a>>,
 
     pub events: Vec<Event>,
     pub dispatched_events: Vec<HexEvent>,
@@ -23,7 +25,7 @@ pub struct State <'a> {
 }
 
 impl <'a> State <'a> {
-    pub fn new(hexagons: HexagonColumn, _grid_size: (usize, usize)) -> State<'static> {
+    pub fn new(hexagons: HexagonColumn, _grid_size: GridSize) -> State<'static> {
         State {
             tick_time: 0.0,
 
@@ -39,7 +41,16 @@ impl <'a> State <'a> {
             units_sprites: Vec::new(),
             unit_selected: None,
             unit_selection_effect_timer: 0.0,
+            hex_improvements: Vec::new(),
         }
+    }
+
+    pub fn get_hex_with_position(&self, x: i32, y: i32) -> &Hexagon {
+        &self.hexagons[y as usize][x as usize]
+    }
+
+    pub fn get_hex_with_position_mut(&mut self, x: i32, y: i32) -> &mut Hexagon {
+        self.hexagons[y as usize].get_mut(x as usize).unwrap()
     }
 
     pub fn get_city_on_hex(&self, hex: &Hexagon) -> Option<&City<'a>> {

@@ -15,6 +15,8 @@ mod unit_movement;
 mod unit_movement_event;
 mod unit_placement;
 mod unit_order;
+mod hex_improvement_sprite;
+mod hex_improvement_build_farm_event;
 mod textures;
 mod inputs;
 
@@ -37,3 +39,5 @@ pub use unit_movement::init_unit_movement;
 pub use unit_movement_event::*;
 pub use unit_placement::init_unit_placement;
 pub use unit_order::init_unit_order;
+pub use hex_improvement_sprite::*;
+pub use hex_improvement_build_farm_event::*;

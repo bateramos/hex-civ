@@ -3,6 +3,7 @@ use std::hash::{Hash, Hasher};
 
 use sfml::{graphics::*, system::*};
 
+use crate::GridSize;
 use crate::entities::{HexagonLine, HexagonColumn, Hexagon, HexagonCategory};
 use crate::controllers::LoadedTextures;
 
@@ -17,7 +18,7 @@ fn generate_random<H>(args: Vec<H>, seed: u64) -> u32 where H: Hash {
     (hash * seed) as u32 % 100
 }
 
-pub fn init_map_creation<'a>(scale: f32, seed: u64, textures: &'a LoadedTextures, grid_size: &(usize, usize)) -> (HexagonColumn, Vec<Sprite<'a>>, Vec<CustomShape<'a>>) {
+pub fn init_map_creation<'a>(scale: f32, seed: u64, textures: &'a LoadedTextures, grid_size: &GridSize) -> (HexagonColumn, Vec<Sprite<'a>>, Vec<CustomShape<'a>>) {
     let mut hexagons = HexagonColumn::new();
     let mut background_grid = Vec::new();
     let mut sprites = Vec::new();

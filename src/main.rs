@@ -37,6 +37,7 @@ type ControlActionsFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> 
 type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>) -> SfBox<View>>;
 
 type Resolution = (u32, u32, f32);
+type GridSize = (usize, usize);
 
 fn resolutions() -> Vec<Resolution> {
     vec![
@@ -63,9 +64,9 @@ fn main() {
     let resolution : Resolution = resolutions()[res_index.parse::<usize>().unwrap_or(0)];
     let unit_control_index = &std::env::args().collect::<Vec<String>>()[2];
     let unit_controls : MoveKeyboardConfig = move_configs().remove(unit_control_index.parse::<usize>().unwrap_or(0));
-    let order_controls : OrderKeyboardConfig = OrderKeyboardConfig { build_city: Key::B };
+    let order_controls : OrderKeyboardConfig = OrderKeyboardConfig { build_city: Key::B, build_farm_field: Key::I };
     let scale = resolution.2;
-    let grid_size = (30, 20);
+    let grid_size : GridSize = (30, 20);
     let seed = rand::random::<u64>() % 10000;
 
     println!("Resolution: {:?}; Seed: {};", resolution, seed);
@@ -102,6 +103,7 @@ fn main() {
         init_unit_selection_effect(),
         init_unit_deselection_effect(),
         init_unit_placement(),
+        init_hex_improvement_sprite(scale),
     ];
 
     let control_graphic_fns = vec![
@@ -126,6 +128,7 @@ fn main() {
         init_city_interface_creation(scale),
         init_city_exit_handler(),
         init_unit_movement(grid_size.clone()),
+        init_hex_improvement_build_event(),
     ];
 
     let control_hex_event_graphic_functions = vec![
@@ -146,6 +149,7 @@ fn main() {
     state.cities.push(City::new(Vector2i { x: 2, y: 10 }));
     //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
     state.unit_selected = Some(state.units[0].id);
+    state.hex_improvements.push(HexImprovement::new(Vector2i { x: 4, y: 5 }));
 
     let mut clock = Clock::start();
 
@@ -172,20 +176,51 @@ fn main() {
         window.set_view(&new_view);
         window.clear(Color::BLACK);
 
-        sprites.iter().for_each(|sprite: &Sprite| window.draw(sprite));
+        let mut improve_iter = state.hex_improvements.iter();
+        let mut hex_improvement : Option<&HexImprovement> = improve_iter.next();
+        let mut improvement_to_render : Vec<&HexImprovement> = Vec::new();
+        let mut last_y = 0;
+        sprites.iter().enumerate().for_each(|(index, sprite)| {
+            let y = index / grid_size.0;
+            let x = index % grid_size.0;
+
+            if last_y != y {
+                improvement_to_render.retain(|imp| {
+                    window.draw(imp.sprite.as_ref().unwrap());
+                    false
+                });
+                last_y = y;
+            }
+
+            if let Some(improvement) = &hex_improvement {
+                let x_found = improvement.position.x as usize == x;
+                let y_found = improvement.position.y as usize == y;
+                if x_found && y_found {
+                    improvement_to_render.push(improvement);
+                    hex_improvement = improve_iter.next();
+                }
+            }
+
+            window.draw(sprite);
+        });
+        improvement_to_render.retain(|imp| {
+            window.draw(imp.sprite.as_ref().unwrap());
+            false
+        });
+
         background_grid.iter().for_each(|shape| window.draw(shape));
         state.cities.iter().for_each(|city| window.draw(city.sprite.as_ref().unwrap()));
+        //state.hex_improvements.iter().for_each(|improvement| window.draw(improvement.sprite.as_ref().unwrap()));
         state.units.iter().for_each(|unit| window.draw(unit.sprite.as_ref().unwrap()));
 
-        /*
         state.hexagons.iter().for_each(|line| {
             line.iter().for_each(|hex| {
                 let mut text = Text::new(&format!("{:?}", hex.grid_position), &font, (4. * scale) as u32);
                 text.set_fill_color(Color::RED);
                 text.set_position(hex.center);
-                window.draw(&text);
+                //window.draw(&text);
             });
-        });*/
+        });
 
         state.dispatched_events.clear();
 
