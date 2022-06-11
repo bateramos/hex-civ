@@ -117,6 +117,7 @@ fn main() {
         init_city_mouse_right_click(),
         init_unit_deselection(),
         init_unit_movement_event(unit_controls),
+        init_unit_transform_hex_event_refresh_map(),
     ];
 
     let control_events_fns = vec![
@@ -124,14 +125,14 @@ fn main() {
     ];
 
     let control_hex_event_functions = vec![
-        init_map_sprite_allocation(scale),
         init_unit_deselection_handler(),
         init_unit_transform_hex_event(),
+        init_unit_movement(grid_size.clone()),
         init_city_build_event(),
         init_city_interface_creation(scale),
         init_city_exit_handler(),
-        init_unit_movement(grid_size.clone()),
         init_hex_improvement_build_event(),
+        init_map_sprite_allocation(scale),
     ];
 
     let control_hex_event_graphic_functions = vec![
@@ -249,15 +250,15 @@ fn main() {
             });
         }
 
-        control_event_fns.iter().for_each(|fun| {
-            if let Some(event) = (fun)(&state, &graphics) {
-                state.dispatched_events.push(event);
-            }
-        });
-
         control_events_fns.iter().for_each(|fun| {
             if let Some(events) = (fun)(&state, &graphics) {
                 state.dispatched_events.extend(events);
+            }
+        });
+
+        control_event_fns.iter().for_each(|fun| {
+            if let Some(event) = (fun)(&state, &graphics) {
+                state.dispatched_events.push(event);
             }
         });
 
