@@ -19,6 +19,7 @@ pub struct State <'a> {
     pub city_selected: Option<i32>,
 
     pub units: Vec<Unit<'a>>,
+    pub map_sprites: Vec<Sprite<'a>>,
     pub units_sprites: Vec<Sprite<'a>>,
     pub unit_selected: Option<i32>,
     pub unit_selection_effect_timer: f32,
@@ -38,6 +39,7 @@ impl <'a> State <'a> {
 
             cities: Vec::new(),
             units: Vec::new(),
+            map_sprites: Vec::new(),
             units_sprites: Vec::new(),
             unit_selected: None,
             unit_selection_effect_timer: 0.0,

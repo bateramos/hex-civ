@@ -18,8 +18,10 @@ pub fn init_hex_improvement_sprite(scale: f32) -> ControlFn {
 
             let HexImprovement { sprite, position, .. } = improvement;
             if let Some(sprite) = sprite {
-                sprite.set_position(state.hexagons[position.y as usize][position.x as usize].sprite_position);
-                sprite.move_(Vector2f { y: 2. * scale, x: 1. * scale });
+                if let Some(position) = state.hexagons[position.y as usize][position.x as usize].sprite_position {
+                    sprite.set_position(position);
+                    sprite.move_(Vector2f { y: 2. * scale, x: 1. * scale });
+                }
             }
         });
 

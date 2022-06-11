@@ -46,7 +46,6 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let hill = load_texture(&texture, 3, 0, x_scale, y_scale);
     let hill_with_trees = load_texture(&texture, 4, 0, x_scale, y_scale);
 
-
     let y_scale = 0.75 * scale;
 
     let farm_field  = load_texture(&texture, 3, 1, 0.86 * scale, y_scale);
@@ -57,7 +56,6 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let mountain = load_texture(&texture, 5, 0, x_scale, y_scale);
     let snow = load_texture(&texture, 0, 2, x_scale, 0.8 * scale);
     let snow_with_tress  = load_texture(&texture, 1, 2, x_scale, y_scale);
-
 
     let mut pikeman = Sprite::with_texture_and_rect(&texture_pikeman, &IntRect::new(0, 0, 48, 88));
     pikeman.set_scale(Vector2f {x: 0.4 * scale, y: 0.4 * scale});

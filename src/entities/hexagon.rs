@@ -25,7 +25,7 @@ pub struct Hexagon {
     pub outline_color: Color,
     pub thickness: f32,
     pub center: Vector2f,
-    pub sprite_position: Vector2f,
+    pub sprite_position: Option<Vector2f>,
     pub category: HexagonCategory,
     pub grid_position: (usize, usize),
 }
