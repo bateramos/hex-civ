@@ -3,6 +3,7 @@ use sfml::graphics::Sprite;
 
 use rand;
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum HexImprovementType {
     FARM, MINE
 }
@@ -15,12 +16,16 @@ pub struct HexImprovement<'a> {
 }
 
 impl <'a> HexImprovement <'a> {
-    pub fn new(position: Vector2i) -> HexImprovement<'a> {
+    pub fn new_with_type(position: Vector2i, improvement_type: HexImprovementType) -> HexImprovement<'a> {
         HexImprovement {
             id: rand::random::<i32>(),
             position,
             sprite: None,
-            improvement_type: HexImprovementType::FARM,
+            improvement_type,
         }
+    }
+
+    pub fn new(position: Vector2i) -> HexImprovement<'a> {
+        HexImprovement::new_with_type(position, HexImprovementType::FARM)
     }
 }

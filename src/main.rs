@@ -65,7 +65,7 @@ fn main() {
     let unit_control_index = &std::env::args().collect::<Vec<String>>()[2];
     let unit_controls : MoveKeyboardConfig = move_configs().remove(unit_control_index.parse::<usize>().unwrap_or(0));
     let order_controls : OrderKeyboardConfig = OrderKeyboardConfig {
-        build_city: Key::B, build_farm_field: Key::I, transform: Key::T,
+        build_city: Key::B, build_farm_field: Key::I, build_mine: Key::M, transform: Key::T,
     };
     let scale = resolution.2;
     let grid_size : GridSize = (30, 20);
@@ -87,11 +87,12 @@ fn main() {
 
     let font = Font::from_file("res/fonts/Seagram tfb.ttf").unwrap();
     let texture = Texture::from_file("res/textures/main.png").unwrap();
+    let texture_mine = Texture::from_file("res/textures/mine.png").unwrap();
     let texture_pillar = Texture::from_file("res/textures/pillar.png").unwrap();
     let texture_pikeman = Texture::from_file("res/textures/pikeman.png").unwrap();
     let texture_peasant = Texture::from_file("res/textures/peasant.png").unwrap();
 
-    let textures = init_textures(scale, &texture, &texture_pillar, &texture_pikeman, &texture_peasant);
+    let textures = init_textures(scale, &texture, &texture_mine, &texture_pillar, &texture_pikeman, &texture_peasant);
 
     let control_fns = vec![
         init_key_handler(),
@@ -131,7 +132,8 @@ fn main() {
         init_city_build_event(),
         init_city_interface_creation(scale),
         init_city_exit_handler(),
-        init_hex_improvement_build_event(),
+        init_hex_improvement_build_farm_event(),
+        init_hex_improvement_build_mine_event(),
         init_map_sprite_allocation(scale),
     ];
 
@@ -156,7 +158,6 @@ fn main() {
     state.cities.push(City::new(Vector2i { x: 2, y: 10 }));
     //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
     state.unit_selected = Some(state.units[0].id);
-    state.hex_improvements.push(HexImprovement::new(Vector2i { x: 4, y: 5 }));
 
     state.dispatched_events.push(HexEvent::new("INIT_MAP_HEX_SPRITES"));
 

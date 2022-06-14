@@ -47,6 +47,11 @@ impl <'a> State <'a> {
         }
     }
 
+    pub fn add_hex_improvement(&mut self, hex_improvement: HexImprovement<'a>) {
+        self.hex_improvements.push(hex_improvement);
+        self.hex_improvements.sort_by_key(|a| format!("{:03} {:03}", a.position.y, a.position.x));
+    }
+
     pub fn get_hex_with_position(&self, x: i32, y: i32) -> &Hexagon {
         &self.hexagons[y as usize][x as usize]
     }

@@ -18,6 +18,7 @@ mod unit_order;
 mod unit_transform_hex_event;
 mod hex_improvement_sprite;
 mod hex_improvement_build_farm_event;
+mod hex_improvement_build_mine_event;
 mod textures;
 mod inputs;
 
@@ -43,3 +44,4 @@ pub use unit_order::init_unit_order;
 pub use unit_transform_hex_event::*;
 pub use hex_improvement_sprite::*;
 pub use hex_improvement_build_farm_event::*;
+pub use hex_improvement_build_mine_event::*;

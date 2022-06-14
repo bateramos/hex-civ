@@ -14,6 +14,7 @@ pub struct LoadedTextures <'a> {
     pub snow_with_tress: Sprite<'a>,
 
     pub farm_field: Sprite<'a>,
+    pub mine: Sprite<'a>,
 
     pub pikeman: Sprite<'a>,
     pub peasant: Sprite<'a>,
@@ -33,7 +34,7 @@ fn load_texture_with_rect<'a>(texture: &'a Texture, scale_x: f32, scale_y: f32, 
     sprite
 }
 
-pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a Texture, texture_pikeman: &'a Texture, texture_peasant: &'a Texture) -> LoadedTextures<'a> {
+pub fn init_textures<'a>(scale: f32, texture: &'a Texture, mine_texture: &'a Texture, texture_pillar: &'a Texture, texture_pikeman: &'a Texture, texture_peasant: &'a Texture) -> LoadedTextures<'a> {
     let mut pillar = Sprite::with_texture_and_rect(&texture_pillar, &IntRect::new(0, 0, 50, 160));
     pillar.set_scale(Vector2f {x: scale, y: 1.9 * scale});
 
@@ -49,6 +50,7 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
     let y_scale = 0.75 * scale;
 
     let farm_field  = load_texture(&texture, 3, 1, 0.86 * scale, y_scale);
+    let mine = load_texture(&mine_texture, 0, 0, 0.7 * scale, 0.7 * scale);
 
     let y_scale = 0.8 * scale;
 
@@ -77,6 +79,7 @@ pub fn init_textures<'a>(scale: f32, texture: &'a Texture, texture_pillar: &'a T
         snow_with_tress,
 
         farm_field,
+        mine,
 
         pikeman,
         peasant,
