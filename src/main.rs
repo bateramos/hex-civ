@@ -173,15 +173,15 @@ fn main() {
 
         state.events = events;
 
-        state = control_fns.iter().fold(state, |state, fun| {
-            (fun)(state, &graphics)
-        });
-
         new_view = control_graphic_fns.iter().fold(new_view, |new_view, fun| {
             (fun)(new_view, &state, &graphics)
         });
 
         graphics.view_center = new_view.center();
+
+        state = control_fns.iter().fold(state, |state, fun| {
+            (fun)(state, &graphics)
+        });
 
         window.set_view(&new_view);
         window.clear(Color::BLACK);
