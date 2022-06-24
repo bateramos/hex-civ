@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use sfml::system::Vector2i;
 use sfml::graphics::Sprite;
 
@@ -8,6 +10,7 @@ pub struct City <'a> {
     pub id: i32,
     pub position: Vector2i,
     pub sprite: Option<Sprite<'a>>,
+    pub storage: HashMap<&'a str, i32>,
 }
 
 impl <'a> City <'a> {
@@ -16,6 +19,7 @@ impl <'a> City <'a> {
             id: rand::random::<i32>(),
             position,
             sprite: None,
+            storage: HashMap::new(),
         }
     }
 }

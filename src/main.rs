@@ -67,6 +67,7 @@ fn main() {
     let order_controls : OrderKeyboardConfig = OrderKeyboardConfig {
         build_city: Key::B, build_farm_field: Key::I, build_mine: Key::M, transform: Key::T,
     };
+    let map_config : MapKeyboardConfig = MapKeyboardConfig { new_turn: Key::SPACE };
     let scale = resolution.2;
     let grid_size : GridSize = (30, 20);
     let seed = rand::random::<u64>() % 10000;
@@ -112,6 +113,7 @@ fn main() {
     ];
 
     let control_event_fns = vec![
+        init_turn_event(map_config),
         init_map_sprite_start_event(),
         init_mouse_button_handler(),
         init_city_interface(),
@@ -130,6 +132,7 @@ fn main() {
         init_unit_transform_hex_event(),
         init_unit_movement(grid_size.clone()),
         init_city_build_event(),
+        init_city_storage_manager(),
         init_city_interface_creation(scale),
         init_city_exit_handler(),
         init_hex_improvement_build_farm_event(),
@@ -155,7 +158,8 @@ fn main() {
 
     let mut state = State::new(hexagons, grid_size);
     state.units.push(Unit::new_with_type(Vector2i { x: 5, y: 5 }, UnitType::Settler));
-    state.cities.push(City::new(Vector2i { x: 2, y: 10 }));
+    let city = City::new(Vector2i { x: 2, y: 10 });
+    state.cities.push(city);
     //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
     state.unit_selected = Some(state.units[0].id);
 
