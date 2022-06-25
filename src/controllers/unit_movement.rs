@@ -7,13 +7,9 @@ pub fn init_unit_movement<'a>(grid_size: GridSize) -> ControlEventFn<'a> {
             let unit = state.units.iter_mut().find(|u| u.id == event.unit_id.unwrap()).unwrap();
 
             let within_map : bool = if let Some(position) = event.position {
-                if position.y < 0 {
+                if position.y >= grid_size.1 {
                     false
-                } else if position.y as usize >= grid_size.1 {
-                    false
-                } else if position.x < 0 {
-                    false
-                } else if position.x as usize >= grid_size.0 {
+                } else if position.x >= grid_size.0 {
                     false
                 } else {
                     true

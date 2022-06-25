@@ -37,7 +37,7 @@ type ControlActionsFn = Box<dyn for<'a> Fn(&State<'a>, &GraphicsContext<'a>) -> 
 type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsContext<'a>) -> SfBox<View>>;
 
 type Resolution = (u32, u32, f32);
-type GridSize = (usize, usize);
+type GridSize = (u32, u32);
 
 fn resolutions() -> Vec<Resolution> {
     vec![
@@ -157,8 +157,8 @@ fn main() {
     //let selected_city = hexagons[3][3];
 
     let mut state = State::new(hexagons, grid_size);
-    state.units.push(Unit::new_with_type(Vector2i { x: 5, y: 5 }, UnitType::Settler));
-    let city = City::new(Vector2i { x: 2, y: 10 });
+    state.units.push(Unit::new_with_type(Vector2u { x: 5, y: 5 }, UnitType::Settler));
+    let city = City::new(Vector2u { x: 3, y: 9 });
     state.cities.push(city);
     //state.city_selected = Some(state.get_city_on_hex(&selected_city).unwrap().id);
     state.unit_selected = Some(state.units[0].id);
@@ -195,8 +195,8 @@ fn main() {
         let mut improvement_to_render : Vec<&HexImprovement> = Vec::new();
         let mut last_y = 0;
         state.map_sprites.iter().enumerate().for_each(|(index, sprite)| {
-            let y = index / grid_size.0;
-            let x = index % grid_size.0;
+            let y = index as u32 / grid_size.0;
+            let x = index as u32 % grid_size.0;
 
             if last_y != y {
                 improvement_to_render.retain(|imp| {
@@ -207,8 +207,8 @@ fn main() {
             }
 
             if let Some(improvement) = &hex_improvement {
-                let x_found = improvement.position.x as usize == x;
-                let y_found = improvement.position.y as usize == y;
+                let x_found = improvement.position.x as u32 == x;
+                let y_found = improvement.position.y as u32 == y;
                 if x_found && y_found {
                     improvement_to_render.push(improvement);
                     hex_improvement = improve_iter.next();

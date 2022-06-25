@@ -24,3 +24,11 @@ pub fn find_with_location(center: Vector2f, hexagons: &HexagonColumn) -> Option<
         })
     })
 }
+
+pub fn get_top_position(position: &Vector2i) -> Vector2i {
+    Vector2i { x: position.x, y: position.y - 1 }
+}
+
+pub fn get_bottom_position(position: &Vector2i) -> Vector2i {
+    Vector2i { x: position.x, y: position.y + 1 }
+}

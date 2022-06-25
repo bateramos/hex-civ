@@ -52,31 +52,31 @@ impl <'a> State <'a> {
         self.hex_improvements.sort_by_key(|a| format!("{:03} {:03}", a.position.y, a.position.x));
     }
 
-    pub fn get_hex_with_position(&self, x: i32, y: i32) -> &Hexagon {
+    pub fn get_hex_with_position(&self, x: u32, y: u32) -> &Hexagon {
         &self.hexagons[y as usize][x as usize]
     }
 
-    pub fn get_hex_with_position_mut(&mut self, x: i32, y: i32) -> &mut Hexagon {
+    pub fn get_hex_with_position_mut(&mut self, x: u32, y: u32) -> &mut Hexagon {
         self.hexagons[y as usize].get_mut(x as usize).unwrap()
     }
 
     pub fn get_city_on_hex(&self, hex: &Hexagon) -> Option<&City<'a>> {
-        let x = hex.grid_position.0 as i32;
-        let y = hex.grid_position.1 as i32;
+        let x = hex.grid_position.0;
+        let y = hex.grid_position.1;
 
         self.cities.iter().find(|c| c.position.x == x && c.position.y == y)
     }
 
     pub fn get_unit_on_hex(&self, hex: &Hexagon) -> Option<&Unit<'a>> {
-        let x = hex.grid_position.0 as i32;
-        let y = hex.grid_position.1 as i32;
+        let x = hex.grid_position.0;
+        let y = hex.grid_position.1;
 
         self.units.iter().find(|u| u.position.x == x && u.position.y == y)
     }
 
     pub fn get_unit_on_hex_mut(&mut self, hex: &Hexagon) -> Option<&mut Unit<'a>> {
-        let x = hex.grid_position.0 as i32;
-        let y = hex.grid_position.1 as i32;
+        let x = hex.grid_position.0;
+        let y = hex.grid_position.1;
 
         self.units.iter_mut().find(|u| u.position.x == x && u.position.y == y)
     }

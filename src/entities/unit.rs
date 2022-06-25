@@ -1,4 +1,4 @@
-use sfml::system::Vector2i;
+use sfml::system::Vector2u;
 use sfml::graphics::Sprite;
 
 use rand;
@@ -12,12 +12,12 @@ pub enum UnitType {
 pub struct Unit <'a> {
     pub id: i32,
     pub unit_type: UnitType,
-    pub position: Vector2i,
+    pub position: Vector2u,
     pub sprite: Option<Sprite<'a>>,
 }
 
 impl <'a> Unit <'a> {
-    pub fn new(position: Vector2i) -> Unit<'a> {
+    pub fn new(position: Vector2u) -> Unit<'a> {
         Unit {
             id: rand::random::<i32>(),
             unit_type: UnitType::Pikeman,
@@ -25,7 +25,7 @@ impl <'a> Unit <'a> {
             sprite: None,
         }
     }
-    pub fn new_with_type(position: Vector2i, unit_type: UnitType) -> Unit<'a> {
+    pub fn new_with_type(position: Vector2u, unit_type: UnitType) -> Unit<'a> {
         let mut unit = Unit::new(position);
         unit.unit_type = unit_type;
 

@@ -1,4 +1,4 @@
-use sfml::{window::*, system::Vector2i};
+use sfml::{window::*, system::Vector2u};
 
 use crate::entities::MoveKeyboardConfig;
 use crate::{ControlActionFn, HexEvent};
@@ -60,9 +60,7 @@ pub fn init_unit_movement_event(move_config: MoveKeyboardConfig) -> ControlActio
             });
 
             if event_triggered {
-                let to_position = Vector2i { x: x as i32, y: y as i32 };
-
-                Some(HexEvent::new_from_unit_position(UNIT_MOVEMENT_EVENT, unit, to_position))
+                Some(HexEvent::new_from_unit_position(UNIT_MOVEMENT_EVENT, unit, Vector2u { x, y }))
             } else {
                 None
             }

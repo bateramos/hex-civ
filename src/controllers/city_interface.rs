@@ -50,7 +50,7 @@ pub struct CityInterface <'a> {
     text: Text<'a>,
     left_pillar: Sprite<'a>,
     right_pillar: Sprite<'a>,
-    city_hex_position: Vector2i,
+    city_hex_position: Vector2u,
     pub exit_button: Button<'a>,
     pub build_unit_buttons: Vec<Button<'a>>,
 }
@@ -105,8 +105,8 @@ pub fn init_city_interface_creation<'a>(scale: f32) -> ControlEventFn<'a> {
             let center = graphics.view_center;
             let hex = find_with_location(center, &state.hexagons).unwrap();
 
-            let city_hex_position = Vector2i {
-                x: hex.grid_position.0 as i32, y: hex.grid_position.1 as i32
+            let city_hex_position = Vector2u {
+                x: hex.grid_position.0, y: hex.grid_position.1
             };
             let view_size = graphics.view_size;
             let view_center = graphics.view_center;
