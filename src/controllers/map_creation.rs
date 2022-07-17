@@ -4,7 +4,12 @@ use std::hash::{Hash, Hasher};
 use sfml::{graphics::*, system::*};
 
 use crate::{GridSize, EventStateFn, ControlActionFn, State};
-use crate::entities::{HexagonLine, HexagonColumn, Hexagon, HexagonCategory, HexEvent};
+use crate::entities::{HexagonLine, HexagonColumn, Hexagon, HexagonCategory, HexEvent, HexImprovement};
+
+pub struct HexagonSprites <'a> {
+    pub id: u32,
+    pub sprites: Vec<Sprite<'a>>,
+}
 
 fn generate_random<H>(args: Vec<H>, seed: u64) -> u32 where H: Hash {
     let mut hasher = DefaultHasher::new();
@@ -19,7 +24,6 @@ fn generate_random<H>(args: Vec<H>, seed: u64) -> u32 where H: Hash {
 
 pub fn create_map_hex<'a>(scale: f32, seed: u64, grid_size: &GridSize) -> HexagonColumn {
     let mut hexagons = HexagonColumn::new();
-    let mut background_grid = Vec::new();
 
     let padding = 5. * scale;
 
@@ -62,14 +66,15 @@ pub fn create_map_hex<'a>(scale: f32, seed: u64, grid_size: &GridSize) -> Hexago
                 id: rand::random::<u32>(), category, grid_position: (x_i, y_i),
                 scale, position: Vector2f { x, y }, center, sprite_position: None,
                 fill_color: Color::TRANSPARENT, outline_color: Color::rgba(86, 84, 85, 51), thickness: 1.,
+                improvements: vec![],
             };
 
+            /*
             let mut shape = CustomShape::new(Box::new(hexagon));
-            shape.set_fill_color(hexagon.fill_color);
-            shape.set_outline_color(hexagon.outline_color);
-            shape.set_outline_thickness(hexagon.thickness);
-
-            background_grid.push(shape);
+            shape.set_fill_color(Color::TRANSPARENT);
+            shape.set_outline_color(Color::rgba(86, 84, 85, 51));
+            shape.set_outline_thickness(1.);
+            */
 
             line.push(hexagon);
         }
@@ -83,7 +88,7 @@ pub fn create_map_hex<'a>(scale: f32, seed: u64, grid_size: &GridSize) -> Hexago
 pub fn init_map_sprite_start_event() -> ControlActionFn {
     Box::new(|state, _| {
         if state.map_sprites.is_empty() {
-            Some(HexEvent::new(""))
+            Some(HexEvent::new("INIT_MAP_HEX_SPRITES"))
         } else {
             None
         }
@@ -124,11 +129,27 @@ pub fn init_map_sprite_allocation<'a>(scale: f32) -> EventStateFn<'a> {
                     };
                     sprite.set_position(sprite_position);
 
+                    let mut hex_sprite = HexagonSprites {
+                        id: hex.id,
+                        sprites: vec![sprite.clone()],
+                    };
+
                     hex.sprite_position = Some(sprite_position);
+
+                    hex.improvements.iter()
+                        .filter_map(|id_imp| state.hex_improvements.iter().find(|hex_imp| hex_imp.id == *id_imp))
+                        .collect::<Vec<&HexImprovement>>()
+                        .iter()
+                        .for_each(|imp| {
+                            if let Some(sprite) = &imp.sprite {
+                                hex_sprite.sprites.push(sprite.clone());
+                            }
+                        });
+
                     if hex.grid_position.0 % 2 == 0 && map_sprites.len() > 0 {
-                        map_sprites.insert(map_sprites.len() - 1, sprite);
+                        map_sprites.insert(map_sprites.len() - 1, hex_sprite);
                     } else {
-                        map_sprites.insert(map_sprites.len(), sprite);
+                        map_sprites.insert(map_sprites.len(), hex_sprite);
                     }
                 });
             });

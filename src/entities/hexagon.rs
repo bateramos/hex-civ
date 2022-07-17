@@ -1,4 +1,5 @@
 use sfml::{system::*, graphics::*};
+use crate::HexImprovement;
 
 pub type HexagonLine = Vec<Hexagon>;
 pub type HexagonColumn = Vec<HexagonLine>;
@@ -16,7 +17,7 @@ pub enum HexagonCategory {
     Forest,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Hexagon {
     pub id: u32,
     pub scale: f32,
@@ -26,6 +27,7 @@ pub struct Hexagon {
     pub thickness: f32,
     pub center: Vector2f,
     pub sprite_position: Option<Vector2f>,
+    pub improvements: Vec<i32>,
     pub category: HexagonCategory,
     pub grid_position: (u32, u32),
 }

@@ -39,14 +39,14 @@ type ControlGraphicsFn = Box<dyn for<'a> Fn(SfBox<View>, &State<'a>, &GraphicsCo
 type Resolution = (u32, u32, f32);
 type GridSize = (u32, u32);
 
-fn resolutions() -> Vec<Resolution> {
+fn resolutions(index: usize) -> Resolution {
     vec![
         (2048, 1536, 5.),
         (800, 600, 3.),
-    ]
+    ].remove(index)
 }
 
-fn move_configs() -> Vec<MoveKeyboardConfig> {
+fn move_configs(index: usize) -> MoveKeyboardConfig {
     vec![
         MoveKeyboardConfig {
             top_left: Key::U, top: Key::I, top_right: Key::O,
@@ -56,17 +56,28 @@ fn move_configs() -> Vec<MoveKeyboardConfig> {
             top_left: Key::NUMPAD7, top: Key::NUMPAD8, top_right: Key::NUMPAD9,
             bottom_left: Key::NUMPAD4, bottom: Key::NUMPAD5, bottom_right: Key::NUMPAD6
         },
-    ]
+    ].remove(index)
+}
+
+fn order_configs(index: usize) -> OrderKeyboardConfig {
+    vec![
+        OrderKeyboardConfig {
+            build_city: Key::B, build_farm_field: Key::F, build_mine: Key::M, transform: Key::T,
+        },
+        OrderKeyboardConfig {
+            build_city: Key::B, build_farm_field: Key::I, build_mine: Key::M, transform: Key::T,
+        },
+    ].remove(index)
 }
 
 fn main() {
-    let res_index = &std::env::args().collect::<Vec<String>>()[1];
-    let resolution : Resolution = resolutions()[res_index.parse::<usize>().unwrap_or(0)];
-    let unit_control_index = &std::env::args().collect::<Vec<String>>()[2];
-    let unit_controls : MoveKeyboardConfig = move_configs().remove(unit_control_index.parse::<usize>().unwrap_or(0));
-    let order_controls : OrderKeyboardConfig = OrderKeyboardConfig {
-        build_city: Key::B, build_farm_field: Key::I, build_mine: Key::M, transform: Key::T,
-    };
+    let args = &std::env::args().collect::<Vec<String>>();
+    let res_index = args[1].parse::<usize>().unwrap_or(0);
+    let control_index = args[2].parse::<usize>().unwrap_or(0);
+
+    let resolution : Resolution = resolutions(res_index);
+    let unit_controls : MoveKeyboardConfig = move_configs(control_index);
+    let order_controls : OrderKeyboardConfig = order_configs(control_index);
     let map_config : MapKeyboardConfig = MapKeyboardConfig { new_turn: Key::SPACE };
     let scale = resolution.2;
     let grid_size : GridSize = (30, 20);
@@ -95,7 +106,11 @@ fn main() {
 
     let textures = init_textures(scale, &texture, &texture_mine, &texture_pillar, &texture_pikeman, &texture_peasant);
 
-    let control_fns = vec![
+    let control_graphic_fns : Vec<ControlGraphicsFn> = vec![
+        init_map_navigation(new_view.center()),
+    ];
+
+    let control_fns : Vec<ControlFn> = vec![
         init_key_handler(),
         init_city_selection(),
         init_city_sprites(),
@@ -105,14 +120,16 @@ fn main() {
         init_unit_selection_effect(),
         init_unit_deselection_effect(),
         init_unit_placement(),
-        init_hex_improvement_sprite(scale),
     ];
 
-    let control_graphic_fns = vec![
-        init_map_navigation(new_view.center()),
+    // Events Cleared
+
+    let control_events_fns : Vec<ControlActionsFn> = vec![
+        init_unit_order(order_controls),
+        init_hex_improvement_sprite_reload(),
     ];
 
-    let control_event_fns = vec![
+    let control_event_fns : Vec<ControlActionFn> = vec![
         init_turn_event(map_config),
         init_map_sprite_start_event(),
         init_mouse_button_handler(),
@@ -123,11 +140,7 @@ fn main() {
         init_unit_transform_hex_event_refresh_map(),
     ];
 
-    let control_events_fns = vec![
-        init_unit_order(order_controls),
-    ];
-
-    let control_hex_event_functions = vec![
+    let control_hex_event_functions : Vec<EventStateFn> = vec![
         init_unit_deselection_handler(),
         init_unit_transform_hex_event(),
         init_unit_movement(grid_size.clone()),
@@ -137,10 +150,11 @@ fn main() {
         init_city_exit_handler(),
         init_hex_improvement_build_farm_event(),
         init_hex_improvement_build_mine_event(),
+        init_hex_improvement_sprite(scale),
         init_map_sprite_allocation(scale),
     ];
 
-    let control_hex_event_graphic_functions = vec![
+    let control_hex_event_graphic_functions : Vec<EventGraphicFn> = vec![
         init_map_unit_follow(scale),
     ];
 
@@ -190,49 +204,22 @@ fn main() {
         window.set_view(&new_view);
         window.clear(Color::BLACK);
 
-        let mut improve_iter = state.hex_improvements.iter();
-        let mut hex_improvement : Option<&HexImprovement> = improve_iter.next();
-        let mut improvement_to_render : Vec<&HexImprovement> = Vec::new();
-        let mut last_y = 0;
-        state.map_sprites.iter().enumerate().for_each(|(index, sprite)| {
-            let y = index as u32 / grid_size.0;
-            let x = index as u32 % grid_size.0;
-
-            if last_y != y {
-                improvement_to_render.retain(|imp| {
-                    window.draw(imp.sprite.as_ref().unwrap());
-                    false
-                });
-                last_y = y;
-            }
-
-            if let Some(improvement) = &hex_improvement {
-                let x_found = improvement.position.x as u32 == x;
-                let y_found = improvement.position.y as u32 == y;
-                if x_found && y_found {
-                    improvement_to_render.push(improvement);
-                    hex_improvement = improve_iter.next();
-                }
-            }
-
-            window.draw(sprite);
+        state.map_sprites.iter().for_each(|hex_sprite| {
+            hex_sprite.sprites.iter().for_each(|sprite| window.draw(sprite));
         });
-        improvement_to_render.iter().for_each(|imp|
-            window.draw(imp.sprite.as_ref().unwrap())
-        );
 
         //background_grid.iter().for_each(|shape| window.draw(shape));
         state.cities.iter().filter(|city| city.sprite.is_some()).for_each(|city| window.draw(city.sprite.as_ref().unwrap()));
         state.units.iter().filter(|unit| unit.sprite.is_some()).for_each(|unit| window.draw(unit.sprite.as_ref().unwrap()));
 
-        state.hexagons.iter().for_each(|line| {
+        /*state.hexagons.iter().for_each(|line| {
             line.iter().for_each(|hex| {
                 let mut text = Text::new(&format!("{:?}", hex.grid_position), &font, (4. * scale) as u32);
                 text.set_fill_color(Color::RED);
                 text.set_position(hex.center);
                 window.draw(&text);
             });
-        });
+        });*/
 
         if !state.map_sprites.is_empty() {
             state.dispatched_events.clear();

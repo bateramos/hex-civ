@@ -2,6 +2,7 @@ use sfml::graphics::Sprite;
 use sfml::window::Event;
 
 use crate::GridSize;
+use crate::HexagonSprites;
 use crate::entities::*;
 use crate::controllers::*;
 
@@ -19,7 +20,7 @@ pub struct State <'a> {
     pub city_selected: Option<i32>,
 
     pub units: Vec<Unit<'a>>,
-    pub map_sprites: Vec<Sprite<'a>>,
+    pub map_sprites: Vec<HexagonSprites<'a>>,
     pub units_sprites: Vec<Sprite<'a>>,
     pub unit_selected: Option<i32>,
     pub unit_selection_effect_timer: f32,
@@ -48,8 +49,10 @@ impl <'a> State <'a> {
     }
 
     pub fn add_hex_improvement(&mut self, hex_improvement: HexImprovement<'a>) {
+        let hex = self.get_hex_with_position_mut(hex_improvement.position.x, hex_improvement.position.y);
+        hex.improvements.push(hex_improvement.id);
+
         self.hex_improvements.push(hex_improvement);
-        self.hex_improvements.sort_by_key(|a| format!("{:03} {:03}", a.position.y, a.position.x));
     }
 
     pub fn get_hex_with_position(&self, x: u32, y: u32) -> &Hexagon {
